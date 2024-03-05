@@ -1,5 +1,5 @@
 CREATE TABLE Event (
-    id BIGINT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
     description TEXT,
     start_time TIMESTAMP,

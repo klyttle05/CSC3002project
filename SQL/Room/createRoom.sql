@@ -1,5 +1,5 @@
 CREATE TABLE Room (
-    id BIGINT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     capacity INT,
     location VARCHAR(255)

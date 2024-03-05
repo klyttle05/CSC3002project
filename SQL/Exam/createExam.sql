@@ -1,5 +1,5 @@
 CREATE TABLE Exam (
-    id BIGINT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
     duration_minutes INT,
     start_time TIMESTAMP,

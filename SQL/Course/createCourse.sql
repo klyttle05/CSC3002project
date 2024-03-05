@@ -1,5 +1,5 @@
 CREATE TABLE Course (
-    id BIGINT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
     code VARCHAR(50),
     description TEXT,

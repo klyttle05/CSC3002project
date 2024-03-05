@@ -1,5 +1,5 @@
 CREATE TABLE Lesson (
-    id BIGINT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255),
     start_time TIMESTAMP,
     end_time TIMESTAMP,
