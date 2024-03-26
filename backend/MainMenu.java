@@ -1,13 +1,22 @@
-import javax.swing.*;
-import java.awt.*;
+import java.util.function.Function;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class MainMenu extends JFrame {
     private String userType;
 
-    public MainMenu(String userType) {
+    private String userId; // This replaces studentId and can represent any user
+
+    public MainMenu(String userType, String userId) {
         this.userType = userType;
+        this.userId = userId; // Generic user ID
         initializeUI();
     }
+    
 
     private void initializeUI() {
         setTitle("Main Menu - " + userType);
@@ -15,11 +24,11 @@ public class MainMenu extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Center the window
 
-        setLayout(new GridLayout(0, 1)); // Adjust grid layout rows and columns as needed
+        setLayout(new GridLayout(0, 1));
         JLabel welcomeLabel = new JLabel("Welcome, " + userType + "!", JLabel.CENTER);
         add(welcomeLabel);
 
-        JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5)); // Adjust grid layout for better UI
+        JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
         if ("Admin".equals(userType)) {
             addButton(panel, "Timetable for Staff member", new StaffTimetableScreen());
             addButton(panel, "Timetable for Room", new RoomTimetableScreen());
@@ -41,13 +50,21 @@ public class MainMenu extends JFrame {
         JButton button = new JButton(text);
         button.addActionListener(e -> {
             screen.setVisible(true);
-            MainMenu.this.setVisible(false); // Optionally hide the main menu
+            MainMenu.this.setVisible(false); //hide the main menu
         });
         panel.add(button);
     }
 
-    // Placeholder classes representing different screens
-    // You would replace these with actual class implementations
+    private void addButton(JPanel panel, String text, Function<String, JFrame> screenSupplier) {
+        JButton button = new JButton(text);
+        button.addActionListener(e -> {
+            JFrame screen = screenSupplier.apply(this.userId);
+            screen.setVisible(true);
+            MainMenu.this.setVisible(false); //hide the main menu
+        });
+    panel.add(button);
+    }
+
     class StaffTimetableScreen extends JFrame { /* Implementation */ }
     class RoomTimetableScreen extends JFrame { /* Implementation */ }
     class ModuleTimetableScreen extends JFrame { /* Implementation */ }
@@ -55,12 +72,26 @@ public class MainMenu extends JFrame {
     class DeleteActivityScreen extends JFrame { /* Implementation */ }
     class AddActivityScreen extends JFrame { /* Implementation */ }
     class SearchStudentTimetableScreen extends JFrame { /* Implementation */ }
-    class YourTeachersScreen extends JFrame { /* Implementation */ }
-    class YourModulesScreen extends JFrame { /* Implementation */ }
+    class YourTeachersScreen extends JFrame {
+        public YourTeachersScreen(String userId) {
+            // Implementation that uses userId to fetch and display information
+        }
+    }
+    
+    class YourModulesScreen extends JFrame {
+        public YourModulesScreen(String userId) {
+            // Implementation that uses userId to fetch and display information
+        }
+    }
+    
+    // Similar adjustments for admin-specific screens if needed
+    
     class ShowStudentTimetableScreen extends JFrame { /* Implementation */ }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainMenu("Admin").setVisible(true));
-        // Replace "Admin" with "Student" to test the student view.
+        SwingUtilities.invokeLater(() -> new MainMenu("Student", "S1234567").setVisible(true)); // Example for a student
+        // or
+        SwingUtilities.invokeLater(() -> new MainMenu("Admin", "A1234567").setVisible(true)); // Example for an admin
     }
+    
 }

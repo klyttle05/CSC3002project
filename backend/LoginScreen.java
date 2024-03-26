@@ -1,8 +1,3 @@
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -14,7 +9,7 @@ import javax.swing.SwingUtilities;
 
 public class LoginScreen extends JFrame implements ActionListener {
     
-    private JTextField userField;
+    private JTextField userIdField; // Assuming you have a field for User ID or Username
     private JPasswordField passwordField;
     private JButton loginButton;
     
@@ -28,9 +23,9 @@ public class LoginScreen extends JFrame implements ActionListener {
         
         // Panel for inputs
         JPanel inputPanel = new JPanel(new GridLayout(2, 2));
-        inputPanel.add(new JLabel("Username:"));
-        userField = new JTextField();
-        inputPanel.add(userField);
+        inputPanel.add(new JLabel("User ID:"));
+        userIdField = new JTextField();
+        inputPanel.add(userIdField);
         
         inputPanel.add(new JLabel("Password:"));
         passwordField = new JPasswordField();
@@ -49,32 +44,32 @@ public class LoginScreen extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String username = userField.getText();
+        String userId = userIdField.getText();
         String password = new String(passwordField.getPassword());
 
-        if ("admin".equals(username) && "admin".equals(password)) {
-            JOptionPane.showMessageDialog(this, "Admin login successful!");
-            openMainMenu("Admin");
-        } else if (isStudentInDatabase(username)) {
-            // Assuming no password required for student login as per requirements
-            JOptionPane.showMessageDialog(this, "Student login successful!");
-            openMainMenu("Student");
+        // Authentication logic here
+        if (isValidCredentials(userId, password)) {
+            String userType = determineUserType(userId); // Implement this based on your logic
+            MainMenu mainMenu = new MainMenu(userType, userId);
+            mainMenu.setVisible(true);
+            this.dispose(); // Close the login screen
         } else {
             JOptionPane.showMessageDialog(this, "Login failed!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private boolean isStudentInDatabase(String studentNumber) {
-        // Placeholder for database check
-        // Implement actual database query here to check student existence
-        return true; // For demonstration, assume true. Replace with actual check.
+    // Placeholder for credentials validation method
+    private boolean isValidCredentials(String userId, String password) {
+        // Implement your validation logic here
+        // For demonstration purposes, let's assume any input is valid
+        return true;
     }
 
-    private void openMainMenu(String userType) {
-        // Close the login window
-        this.dispose();
-        // Open the Main Menu window
-        //SwingUtilities.invokeLater(() -> new MainMenu(userType).setVisible(true));
+    // Placeholder for determining user type
+    private String determineUserType(String userId) {
+        // Implement logic to determine if the user is an Admin or Student
+        // For demonstration, return "Admin" or "Student" based on some condition
+        return userId.startsWith("A") ? "Admin" : "Student";
     }
 
     public static void main(String[] args) {

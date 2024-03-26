@@ -10,6 +10,8 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+import org.w3c.dom.events.Event;
+
 public class ConsoleApp {
 
     private static Scanner scanner = new Scanner(System.in);
@@ -75,8 +77,6 @@ public class ConsoleApp {
         System.out.print("Course Description: ");
         String description = scanner.nextLine();
     
-        // Since we don't have an actual Department class or a way to select it, let's skip it for now
-        // In a complete implementation, you would retrieve or create a Department object here
         Department department = null; // Placeholder for department
     
         Course course = new Course(name, code, description, department);
