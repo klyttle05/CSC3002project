@@ -1,5 +1,3 @@
-import java.util.function.Function;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -8,19 +6,17 @@ import javax.swing.SwingUtilities;
 
 public class MainMenu extends JFrame {
     private String userType;
-
-    private String userId; // This replaces studentId and can represent any user
+    private String userId;
 
     public MainMenu(String userType, String userId) {
         this.userType = userType;
-        this.userId = userId; // Generic user ID
+        this.userId = userId;
         initializeUI();
     }
-    
 
     private void initializeUI() {
         setTitle("Main Menu - " + userType);
-        setSize(500, 400);
+        setSize(500, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Center the window
 
@@ -30,68 +26,57 @@ public class MainMenu extends JFrame {
 
         JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
         if ("Admin".equals(userType)) {
-            addButton(panel, "Timetable for Staff member", new StaffTimetableScreen());
-            addButton(panel, "Timetable for Room", new RoomTimetableScreen());
-            addButton(panel, "Timetable for Module", new ModuleTimetableScreen());
-            addButton(panel, "Book Activity", new BookActivityScreen());
-            addButton(panel, "Delete Activity/Record", new DeleteActivityScreen());
-            addButton(panel, "Add Activity/Record", new AddActivityScreen());
-            addButton(panel, "Search Student Timetable", new SearchStudentTimetableScreen());
+            addButton(panel, "Timetable for Staff Member", e -> openStaffTimetable());
+            addButton(panel, "Timetable for Room", e -> openRoomTimetable());
+            addButton(panel, "Timetable for Module", e -> openModuleTimetable());
+            addButton(panel, "Book Activity", e -> bookActivity());
+            addButton(panel, "Delete Activity/Record", e -> deleteActivity());
+            addButton(panel, "Add Activity/Record", e -> addActivity());
+            addButton(panel, "Search Student Timetable", e -> searchStudentTimetable());
+            addButton(panel, "Create Staff User", e -> openCreateStaffScreen());
+            addButton(panel, "Create Student User", e -> openCreateStudentScreen());
         } else if ("Student".equals(userType)) {
-            addButton(panel, "Your Teachers", new YourTeachersScreen());
-            addButton(panel, "Your Modules", new YourModulesScreen());
-            addButton(panel, "Show Student Timetable", new ShowStudentTimetableScreen());
+            addButton(panel, "Your Teachers", e -> showTeachers());
+            addButton(panel, "Your Modules", e -> showModules());
+            addButton(panel, "Show Student Timetable", e -> showStudentTimetable());
         }
 
         add(panel);
     }
 
-    private void addButton(JPanel panel, String text, JFrame screen) {
+    private void addButton(JPanel panel, String text, ActionListener actionListener) {
         JButton button = new JButton(text);
-        button.addActionListener(e -> {
-            screen.setVisible(true);
-            MainMenu.this.setVisible(false); //hide the main menu
-        });
+        button.addActionListener(actionListener);
         panel.add(button);
     }
 
-    private void addButton(JPanel panel, String text, Function<String, JFrame> screenSupplier) {
-        JButton button = new JButton(text);
-        button.addActionListener(e -> {
-            JFrame screen = screenSupplier.apply(this.userId);
-            screen.setVisible(true);
-            MainMenu.this.setVisible(false); //hide the main menu
-        });
-    panel.add(button);
+    // Placeholder methods for admin actions
+    private void openStaffTimetable() {/* Implementation */}
+    private void openRoomTimetable() {/* Implementation */}
+    private void openModuleTimetable() {/* Implementation */}
+    private void bookActivity() {/* Implementation */}
+    private void deleteActivity() {/* Implementation */}
+    private void addActivity() {/* Implementation */}
+    private void searchStudentTimetable() {/* Implementation */}
+
+    private void openCreateStaffScreen() {
+        // Implementation to open the CreateStaffScreen
+        CreateStaffScreen createStaffScreen = new CreateStaffScreen();
+        createStaffScreen.setVisible(true);
     }
 
-    class StaffTimetableScreen extends JFrame { /* Implementation */ }
-    class RoomTimetableScreen extends JFrame { /* Implementation */ }
-    class ModuleTimetableScreen extends JFrame { /* Implementation */ }
-    class BookActivityScreen extends JFrame { /* Implementation */ }
-    class DeleteActivityScreen extends JFrame { /* Implementation */ }
-    class AddActivityScreen extends JFrame { /* Implementation */ }
-    class SearchStudentTimetableScreen extends JFrame { /* Implementation */ }
-    class YourTeachersScreen extends JFrame {
-        public YourTeachersScreen(String userId) {
-            // Implementation that uses userId to fetch and display information
-        }
+    private void openCreateStudentScreen() {
+        // Implementation to open the CreateStudentScreen
+        CreateStudentScreen createStudentScreen = new CreateStudentScreen();
+        createStudentScreen.setVisible(true);
     }
-    
-    class YourModulesScreen extends JFrame {
-        public YourModulesScreen(String userId) {
-            // Implementation that uses userId to fetch and display information
-        }
-    }
-    
-    // Similar adjustments for admin-specific screens if needed
-    
-    class ShowStudentTimetableScreen extends JFrame { /* Implementation */ }
+
+    // Placeholder methods for student actions
+    private void showTeachers() {/* Implementation */}
+    private void showModules() {/* Implementation */}
+    private void showStudentTimetable() {/* Implementation */}
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainMenu("Student", "S1234567").setVisible(true)); // Example for a student
-        // or
-        SwingUtilities.invokeLater(() -> new MainMenu("Admin", "A1234567").setVisible(true)); // Example for an admin
+        SwingUtilities.invokeLater(() -> new MainMenu("Admin", "A1234567").setVisible(true));
     }
-    
 }

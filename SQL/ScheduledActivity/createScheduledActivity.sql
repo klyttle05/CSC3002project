@@ -4,5 +4,7 @@ CREATE TABLE ScheduledActivity (
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
     room_id BIGINT,
-    FOREIGN KEY (room_id) REFERENCES Room(id)
+    staff_id BIGINT, -- New column for associating a staff member
+    FOREIGN KEY (room_id) REFERENCES Room(id),
+    FOREIGN KEY (staff_id) REFERENCES Staff(id) -- Ensure referential integrity
 );
