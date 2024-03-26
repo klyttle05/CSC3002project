@@ -28,7 +28,7 @@ public class MainMenu extends JFrame {
         if ("Admin".equals(userType)) {
             addButton(panel, "Timetable for Staff Member", e -> openStaffTimetable());
             addButton(panel, "Timetable for Room", e -> openRoomTimetable());
-            addButton(panel, "Timetable for Module", e -> openModuleTimetable());
+            addButton(panel, "Timetable for Module", e -> openModuleTimetable()); // Ensure this method is implemented
             addButton(panel, "Book Activity", e -> bookActivity());
             addButton(panel, "Delete Activity/Record", e -> deleteActivity());
             addButton(panel, "Add Activity/Record", e -> addActivity());
@@ -50,15 +50,23 @@ public class MainMenu extends JFrame {
         panel.add(button);
     }
 
-    // Open the Staff Timetable Screen
+    // Placeholder methods for admin actions
     private void openStaffTimetable() {
         StaffTimetableScreen staffTimetableScreen = new StaffTimetableScreen();
         staffTimetableScreen.setVisible(true);
     }
 
-    // Placeholder method implementations for other actions...
-    private void openRoomTimetable() { /* Implementation */ }
-    private void openModuleTimetable() { /* Implementation */ }
+    private void openRoomTimetable() {
+        RoomTimetableScreen roomTimetableScreen = new RoomTimetableScreen();
+        roomTimetableScreen.setVisible(true);
+    }
+
+    // This method needs to be implemented to open the ModuleTimetableScreen
+    private void openModuleTimetable() {
+        ModuleTimetableScreen moduleTimetableScreen = new ModuleTimetableScreen();
+        moduleTimetableScreen.setVisible(true);
+    }
+
     private void bookActivity() { /* Implementation */ }
     private void deleteActivity() { /* Implementation */ }
     private void addActivity() { /* Implementation */ }
