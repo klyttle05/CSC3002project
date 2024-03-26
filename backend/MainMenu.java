@@ -50,31 +50,34 @@ public class MainMenu extends JFrame {
         panel.add(button);
     }
 
-    // Placeholder methods for admin actions
-    private void openStaffTimetable() {/* Implementation */}
-    private void openRoomTimetable() {/* Implementation */}
-    private void openModuleTimetable() {/* Implementation */}
-    private void bookActivity() {/* Implementation */}
-    private void deleteActivity() {/* Implementation */}
-    private void addActivity() {/* Implementation */}
-    private void searchStudentTimetable() {/* Implementation */}
+    // Open the Staff Timetable Screen
+    private void openStaffTimetable() {
+        StaffTimetableScreen staffTimetableScreen = new StaffTimetableScreen();
+        staffTimetableScreen.setVisible(true);
+    }
+
+    // Placeholder method implementations for other actions...
+    private void openRoomTimetable() { /* Implementation */ }
+    private void openModuleTimetable() { /* Implementation */ }
+    private void bookActivity() { /* Implementation */ }
+    private void deleteActivity() { /* Implementation */ }
+    private void addActivity() { /* Implementation */ }
+    private void searchStudentTimetable() { /* Implementation */ }
 
     private void openCreateStaffScreen() {
-        // Implementation to open the CreateStaffScreen
         CreateStaffScreen createStaffScreen = new CreateStaffScreen();
         createStaffScreen.setVisible(true);
     }
 
     private void openCreateStudentScreen() {
-        // Implementation to open the CreateStudentScreen
         CreateStudentScreen createStudentScreen = new CreateStudentScreen();
         createStudentScreen.setVisible(true);
     }
 
     // Placeholder methods for student actions
-    private void showTeachers() {/* Implementation */}
-    private void showModules() {/* Implementation */}
-    private void showStudentTimetable() {/* Implementation */}
+    private void showTeachers() { /* Implementation */ }
+    private void showModules() { /* Implementation */ }
+    private void showStudentTimetable() { /* Implementation */ }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainMenu("Admin", "A1234567").setVisible(true));
