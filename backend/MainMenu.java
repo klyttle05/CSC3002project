@@ -1,3 +1,6 @@
+import java.awt.GridLayout;
+import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,7 +24,7 @@ public class MainMenu extends JFrame {
         setLocationRelativeTo(null); // Center the window
 
         setLayout(new GridLayout(0, 1));
-        JLabel welcomeLabel = new JLabel("Welcome, " + userType + "!", JLabel.CENTER);
+        JLabel welcomeLabel = new JLabel("Welcome, " + userType + ": " + userId + "!", JLabel.CENTER);
         add(welcomeLabel);
 
         JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));

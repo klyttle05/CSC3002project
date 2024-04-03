@@ -26,5 +26,8 @@
             "database": "universitymanagementsystem",
             "username": "root"
         }
+    ],
+    "java.project.sourcePaths": [
+        "backend"
     ]
 }
