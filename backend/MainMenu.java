@@ -93,11 +93,23 @@ public class MainMenu extends JFrame {
         createStudentScreen.setVisible(true);
     }
 
-    // Placeholder methods for student actions
-    private void showTeachers() { /* Implementation */ }
-    private void showModules() { /* Implementation */ }
-    private void showStudentTimetable() { /* Implementation */ }
+    // Method to display the teachers associated with the logged-in student
+    private void showTeachers() {
+        MyTeachersScreen myTeachersScreen = new MyTeachersScreen(userId);
+        myTeachersScreen.setVisible(true);
+    }
 
+    // Method to display the modules registered by the logged-in student
+    private void showModules() {
+        MyModulesScreen myModulesScreen = new MyModulesScreen(userId);
+        myModulesScreen.setVisible(true);
+    }
+
+    // Method to display the timetable for the logged-in student
+    private void showStudentTimetable() {
+        MyTimetableScreen myTimetableScreen = new MyTimetableScreen(userId);
+        myTimetableScreen.setVisible(true);
+    }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainMenu("Admin", "A1234567").setVisible(true));
     }
