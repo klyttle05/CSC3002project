@@ -130,7 +130,7 @@ public class BookActivityScreen extends JFrame {
 
     // Placeholder for the getConnection() method
     private Connection getConnection() {
-        // Implement your database connection here
+        // Implement database connection here
         return null;
     }
 
