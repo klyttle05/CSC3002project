@@ -54,7 +54,7 @@ public class LoginScreen extends JFrame implements ActionListener {
 
         // Authentication logic here
         if (isValidCredentials(userId, password)) {
-            String userType = determineUserType(userId); // Implement this based on your logic
+            String userType = determineUserType(userId); // Implement this based on logic
             MainMenu mainMenu = new MainMenu(userType, userId);
             mainMenu.setVisible(true);
             this.dispose(); // Close the login screen
@@ -65,7 +65,7 @@ public class LoginScreen extends JFrame implements ActionListener {
 
     // Placeholder for credentials validation method
     private boolean isValidCredentials(String userId, String password) {
-        // Implement your validation logic here
+        // Implement validation logic here
         // For demonstration purposes, let's assume any input is valid
         return true;
     }
