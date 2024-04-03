@@ -31,10 +31,9 @@ public class MainMenu extends JFrame {
         if ("Admin".equals(userType)) {
             addButton(panel, "Timetable for Staff Member", e -> openStaffTimetable());
             addButton(panel, "Timetable for Room", e -> openRoomTimetable());
-            addButton(panel, "Timetable for Module", e -> openModuleTimetable()); // Ensure this method is implemented
+            addButton(panel, "Timetable for Module", e -> openModuleTimetable());
             addButton(panel, "Book Activity", e -> bookActivity());
             addButton(panel, "Delete Activity/Record", e -> deleteActivity());
-            addButton(panel, "Add Activity/Record", e -> addActivity());
             addButton(panel, "Search Student Timetable", e -> searchStudentTimetable());
             addButton(panel, "Create Staff User", e -> openCreateStaffScreen());
             addButton(panel, "Create Student User", e -> openCreateStudentScreen());
@@ -53,7 +52,7 @@ public class MainMenu extends JFrame {
         panel.add(button);
     }
 
-    // Placeholder methods for admin actions
+    // Implemented action methods for admin and student functionalities
     private void openStaffTimetable() {
         StaffTimetableScreen staffTimetableScreen = new StaffTimetableScreen();
         staffTimetableScreen.setVisible(true);
@@ -64,16 +63,25 @@ public class MainMenu extends JFrame {
         roomTimetableScreen.setVisible(true);
     }
 
-    // This method needs to be implemented to open the ModuleTimetableScreen
     private void openModuleTimetable() {
         ModuleTimetableScreen moduleTimetableScreen = new ModuleTimetableScreen();
         moduleTimetableScreen.setVisible(true);
     }
 
-    private void bookActivity() { /* Implementation */ }
-    private void deleteActivity() { /* Implementation */ }
-    private void addActivity() { /* Implementation */ }
-    private void searchStudentTimetable() { /* Implementation */ }
+    private void bookActivity() {
+        BookActivityScreen bookActivityScreen = new BookActivityScreen();
+        bookActivityScreen.setVisible(true);
+    }
+
+    private void deleteActivity() {
+        DeleteActivityScreen deleteActivityScreen = new DeleteActivityScreen();
+        deleteActivityScreen.setVisible(true);
+    }
+
+    private void searchStudentTimetable() {
+        StudentTimetableScreen studentTimetableScreen = new StudentTimetableScreen();
+        studentTimetableScreen.setVisible(true);
+    }
 
     private void openCreateStaffScreen() {
         CreateStaffScreen createStaffScreen = new CreateStaffScreen();
