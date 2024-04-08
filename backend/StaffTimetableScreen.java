@@ -59,9 +59,12 @@ public class StaffTimetableScreen extends JFrame {
 
         Vector<Vector<Object>> data = new Vector<>();
 
-        String sql = "SELECT title, start_time, end_time, location FROM ScheduledActivity WHERE instructor_id = ?";
+        // Adjusted SQL to reflect new database structure
+        String sql = "SELECT sa.title, sa.start_time, sa.end_time, r.name AS location FROM ScheduledActivities sa " +
+                     "LEFT JOIN Rooms r ON sa.room_id = r.room_id " +
+                     "WHERE sa.staff_id = ?";
 
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://universitymanagementsystem", "root", "root");
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, staffId);
@@ -71,7 +74,7 @@ public class StaffTimetableScreen extends JFrame {
                     row.add(rs.getString("title"));
                     row.add(rs.getString("start_time"));
                     row.add(rs.getString("end_time"));
-                    row.add(rs.getString("location"));
+                    row.add(rs.getString("location")); // Adjusted to 'r.name' to fetch room name
                     data.add(row);
                 }
             }
@@ -88,4 +91,3 @@ public class StaffTimetableScreen extends JFrame {
         SwingUtilities.invokeLater(() -> new StaffTimetableScreen().setVisible(true));
     }
 }
-
