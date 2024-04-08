@@ -1,36 +1,40 @@
 {
     "sqltools.connections": [
-        {
-            "mysqlOptions": {
-                "authProtocol": "default",
-                "enableSsl": "Disabled"
-            },
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 3306,
-            "driver": "MySQL",
-            "name": "UniversitySystem",
-            "database": "UniversitySystem",
-            "username": "root"
+      {
+        "mysqlOptions": {
+          "authProtocol": "default",
+          "enableSsl": "Disabled"
         },
-        {
-            "mysqlOptions": {
-                "authProtocol": "default",
-                "enableSsl": "Disabled"
-            },
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 3306,
-            "driver": "MySQL",
-            "name": "universitymanagementsystem",
-            "database": "universitymanagementsystem",
-            "username": "root"
-        }
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 3306,
+        "driver": "MySQL",
+        "name": "UniversitySystem",
+        "database": "UniversitySystem",
+        "username": "root"
+      },
+      {
+        "mysqlOptions": {
+          "authProtocol": "default",
+          "enableSsl": "Disabled"
+        },
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 3306,
+        "driver": "MySQL",
+        "name": "universitymanagementsystem",
+        "database": "universitymanagementsystem",
+        "username": "root"
+      }
     ],
     "java.project.sourcePaths": [
-        "backend"
+      "backend"
+    ],
+    "java.project.referencedLibraries": [
+      "lib/**/*.jar"
     ],
     "dataworkspace.excludedProjects": [
-        "universitysystem/universitysystem.sqlproj"
+      "universitysystem/universitysystem.sqlproj"
     ]
-}
+  }
+  
