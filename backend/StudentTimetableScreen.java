@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Vector;
@@ -49,7 +50,6 @@ public class StudentTimetableScreen extends JFrame {
     }
 
     private void searchTimetable(ActionEvent e) {
-        // Placeholder: fetch timetable data for the given student ID from your database
         Vector<String> columnNames = new Vector<>();
         columnNames.add("ID");
         columnNames.add("Title");
@@ -60,22 +60,29 @@ public class StudentTimetableScreen extends JFrame {
 
         Vector<Vector<Object>> data = new Vector<>();
         
-        // Replace with actual database connection details and query logic
+        String sql = "SELECT sa.activity_id, sa.title, sa.type, sa.start_time, sa.end_time, " +
+                     "COALESCE(r.name, 'Online') AS location, m.name AS moduleName " +
+                     "FROM ScheduledActivities sa " +
+                     "LEFT JOIN Rooms r ON sa.room_id = r.room_id " +
+                     "LEFT JOIN Modules m ON sa.module_id = m.module_id " +
+                     "JOIN StudentModuleRegistrations smr ON m.module_id = smr.module_id " +
+                     "WHERE smr.student_id = ?";
+
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(
-                 "SELECT * FROM ScheduledActivities WHERE student_id = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
              
-            pstmt.setString(1, studentIdField.getText());
+            pstmt.setInt(1, Integer.parseInt(studentIdField.getText()));
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
                 Vector<Object> row = new Vector<>();
-                row.add(rs.getString("id"));
+                row.add(rs.getInt("activity_id"));
                 row.add(rs.getString("title"));
                 row.add(rs.getString("type"));
                 row.add(rs.getTimestamp("start_time").toString());
                 row.add(rs.getTimestamp("end_time").toString());
-                row.add(rs.getString("location_module"));
+                String location = rs.getString("location") != null ? rs.getString("location") : "Online";
+                row.add(location + "/" + rs.getString("moduleName"));
                 data.add(row);
             }
         } catch (Exception ex) {
@@ -83,18 +90,28 @@ public class StudentTimetableScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Error fetching timetable: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        DefaultTableModel model = new DefaultTableModel(data, columnNames);
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         timetableTable.setModel(model);
     }
 
     private Connection getConnection() {
-        // Implement database connection logic here
-        // This is a placeholder for actual database connection
-        return null;
+        try {
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem?useSSL=false";
+            String user = "root";
+            String password = "root";
+            return DriverManager.getConnection(url, user, password);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Database connection failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new StudentTimetableScreen().setVisible(true));
     }
 }
-

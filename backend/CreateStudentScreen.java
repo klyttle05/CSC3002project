@@ -57,18 +57,19 @@ public class CreateStudentScreen extends JFrame {
         String email = emailField.getText();
         String password = new String(passwordField.getPassword());
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = encoder.encode(password);
+        // Assuming BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        // replace this with actual password hashing
+        String hashedPassword = password; // Use actual password hashing here
 
         insertStudent(studentNumber, firstName, lastName, email, hashedPassword);
     }
 
     private void insertStudent(String studentNumber, String firstName, String lastName, String email, String hashedPassword) {
-        String sql = "INSERT INTO Student (student_number, first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Students (student_number, first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://universitymanagementsystem", "root", "root");
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+             
             pstmt.setString(1, studentNumber);
             pstmt.setString(2, firstName);
             pstmt.setString(3, lastName);

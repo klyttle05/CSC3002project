@@ -57,8 +57,9 @@ public class CreateStaffScreen extends JFrame {
         long departmentId = Long.parseLong(departmentIdField.getText());
         String password = new String(passwordField.getPassword());
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = encoder.encode(password);
+        // Placeholder for the BCrypt password encoder
+        // Assume BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = password; // Use actual password hashing here
 
         insertStaffMember(firstName, lastName, email, departmentId, hashedPassword);
     }
@@ -66,9 +67,9 @@ public class CreateStaffScreen extends JFrame {
     private void insertStaffMember(String firstName, String lastName, String email, long departmentId, String hashedPassword) {
         String sql = "INSERT INTO Staff (first_name, last_name, email, department_id, password_hash) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://universitymanagementsystem", "root", "root");
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+             
             pstmt.setString(1, firstName);
             pstmt.setString(2, lastName);
             pstmt.setString(3, email);
