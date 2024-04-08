@@ -1,27 +1,37 @@
 import java.awt.BorderLayout;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+
 public class MyTimetableScreen extends JFrame {
-    private String studentId;
+    private final String studentId;
     private LocalDate currentDate;
-    private JTable timetableTable;
+    private final JTable timetableTable;
 
     public MyTimetableScreen(String studentId) {
         this.studentId = studentId;
-        this.currentDate = LocalDate.now(); // Start with the current date
+        currentDate = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         setTitle("My Timetable");
-        setSize(800, 400);
+        setSize(800, 600);
+        timetableTable = new JTable();
         initializeUI();
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -30,74 +40,93 @@ public class MyTimetableScreen extends JFrame {
     private void initializeUI() {
         setLayout(new BorderLayout());
 
-        // Navigation Panel
         JPanel navigationPanel = new JPanel();
         JButton prevWeekButton = new JButton("Previous Week");
         JButton nextWeekButton = new JButton("Next Week");
-        JButton currentWeekButton = new JButton("Current Week");
-        JDatePicker datePicker = new JDatePicker(); // Placeholder, use an actual date picker component
 
-        prevWeekButton.addActionListener(e -> navigateWeeks(-1));
-        nextWeekButton.addActionListener(e -> navigateWeeks(1));
-        currentWeekButton.addActionListener(e -> navigateWeeks(0));
-        datePicker.addActionListener(e -> selectDateFromPicker(datePicker)); // Implement this method based on your date picker
+        prevWeekButton.addActionListener(e -> updateTimetable(-1));
+        nextWeekButton.addActionListener(e -> updateTimetable(1));
 
         navigationPanel.add(prevWeekButton);
-        navigationPanel.add(currentWeekButton);
         navigationPanel.add(nextWeekButton);
-        navigationPanel.add(datePicker); // Add your date picker component here
 
         add(navigationPanel, BorderLayout.NORTH);
-
-        // Timetable display area
-        timetableTable = new JTable();
         add(new JScrollPane(timetableTable), BorderLayout.CENTER);
 
-        updateTimetable(); // Initial timetable display
+        displayWeeksTimetable();
     }
 
-    private void navigateWeeks(int weekDelta) {
+    private void updateTimetable(int weekDelta) {
         currentDate = currentDate.plusWeeks(weekDelta);
-        updateTimetable();
+        displayWeeksTimetable();
     }
 
-    private void selectDateFromPicker(JDatePicker datePicker) {
-        // currentDate = datePicker.getDate(); // Set currentDate based on date picker's returned value
-        updateTimetable();
-    }
-
-    private void updateTimetable() {
-        // This method will query database for the timetable based on currentDate
-        // and fill the timetableTable with the results.
-        // The following is a placeholder for database query and result processing.
-        
+    private void displayWeeksTimetable() {
         Vector<String> columnNames = new Vector<>();
-        columnNames.add("Date");
-        columnNames.add("Time");
+        columnNames.add("Date & Time");
         columnNames.add("Activity");
-        columnNames.add("Location/Module");
-
+        columnNames.add("Module");
+        columnNames.add("Location");
+    
         Vector<Vector<Object>> data = new Vector<>();
-        // Example data fetching
-        // Replace with actual data fetching logic
-        LocalDate startOfWeek = currentDate.with(DayOfWeek.MONDAY);
-        LocalDate endOfWeek = currentDate.with(DayOfWeek.SUNDAY);
-
-        // Use startOfWeek and endOfWeek in SQL query to fetch the week's timetable
-
-        // Fill the data vector with query results
         
-        DefaultTableModel model = new DefaultTableModel(data, columnNames);
+        // Define start and end of the current viewing week
+        LocalDateTime weekStart = LocalDateTime.of(currentDate, LocalTime.of(8, 0));
+        LocalDateTime weekEnd = LocalDateTime.of(currentDate.plusDays(4), LocalTime.of(18, 0)); // From Monday 8am to Friday 6pm
+    
+        String sql = "SELECT sa.start_time, sa.end_time, m.name AS moduleName, IFNULL(r.name, 'Online') AS location, sa.activity_name " +
+                     "FROM ScheduledActivities sa " +
+                     "JOIN Modules m ON sa.module_id = m.module_id " +
+                     "LEFT JOIN Rooms r ON sa.room_id = r.room_id " +
+                     "JOIN StudentModuleRegistrations smr ON m.module_id = smr.module_id " +
+                     "WHERE smr.student_id = ? AND sa.start_time BETWEEN ? AND ? " +
+                     "ORDER BY sa.start_time";
+    
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            pstmt.setString(1, studentId);
+            pstmt.setTimestamp(2, Timestamp.valueOf(weekStart));
+            pstmt.setTimestamp(3, Timestamp.valueOf(weekEnd));
+    
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Vector<Object> vector = new Vector<>();
+                vector.add(rs.getTimestamp("start_time").toString() + " - " + rs.getTimestamp("end_time").toString());
+                vector.add(rs.getString("activity_name"));
+                vector.add(rs.getString("moduleName"));
+                vector.add(rs.getString("location"));
+                data.add(vector);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error fetching timetable: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         timetableTable.setModel(model);
     }
+    
 
     private Connection getConnection() {
-        // Return database connection here
-        return null;
+        try {
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
+            String user = "root";
+            String password = "root";
+            return DriverManager.getConnection(url, user, password);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database connection failed", "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MyTimetableScreen("StudentIdHere").setVisible(true));
+        SwingUtilities.invokeLater(() -> new MyTimetableScreen("studentId").setVisible(true));
     }
 }
-

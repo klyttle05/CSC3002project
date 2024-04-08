@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Vector;
@@ -12,12 +13,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class MyTeachersScreen extends JFrame {
-    private String studentId;
+    private final String studentId;
 
     public MyTeachersScreen(String studentId) {
         this.studentId = studentId;
         setTitle("My Teachers");
-        setSize(600, 300);
+        setSize(600, 400);
         initializeUI();
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -25,52 +26,65 @@ public class MyTeachersScreen extends JFrame {
 
     private void initializeUI() {
         Vector<String> columnNames = new Vector<>();
-        columnNames.add("Staff ID");
-        columnNames.add("Name");
+        columnNames.add("Teacher Name");
+        columnNames.add("Module");
         columnNames.add("Email");
-        columnNames.add("Department");
 
         Vector<Vector<Object>> data = new Vector<>();
 
+        String sql = "SELECT DISTINCT s.name AS TeacherName, m.name AS Module, s.email " +
+                     "FROM Staff s " +
+                     "JOIN Module m ON m.staff_id = s.id " + 
+                     "JOIN StudentModuleRegistration smr ON smr.module_id = m.id " +
+                     "WHERE smr.student_id = ? " +
+                     "UNION " +
+                     "SELECT DISTINCT s.name, '', s.email " + // Modules might not be directly related to some ScheduledActivities
+                     "FROM ScheduledActivity sa " +
+                     "JOIN Staff s ON sa.staff_id = s.id " +
+                     "WHERE EXISTS (SELECT 1 FROM StudentModuleRegistration smr WHERE smr.student_id = ? AND smr.module_id = sa.module_id)";
+
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(
-                 "SELECT DISTINCT s.id, s.first_name || ' ' || s.last_name AS name, s.email, d.name AS department " +
-                 "FROM Staff s JOIN ModuleStaff ms ON s.id = ms.staff_id " +
-                 "JOIN Module m ON ms.module_id = m.id " +
-                 "JOIN StudentModule sm ON m.id = sm.module_id " +
-                 "LEFT JOIN Event e ON s.id = e.staff_id " +
-                 "JOIN StudentEvent se ON e.id = se.event_id AND se.student_id = ? " +
-                 "JOIN Department d ON s.department_id = d.id " +
-                 "WHERE sm.student_id = ?")) {
-            
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
             pstmt.setString(1, studentId);
-            pstmt.setString(2, studentId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    Vector<Object> row = new Vector<>();
-                    row.add(rs.getString("id"));
-                    row.add(rs.getString("name"));
-                    row.add(rs.getString("email"));
-                    row.add(rs.getString("department"));
-                    data.add(row);
-                }
+            pstmt.setString(2, studentId); // For the UNION part
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Vector<Object> row = new Vector<>();
+                row.add(rs.getString("TeacherName"));
+                row.add(rs.getString("Module")); // This might be empty for activities not directly linked to modules
+                row.add(rs.getString("email"));
+                data.add(row);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error fetching teacher information: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        JTable teachersTable = new JTable(new DefaultTableModel(data, columnNames));
-        JScrollPane scrollPane = new JScrollPane(teachersTable);
-        add(scrollPane, BorderLayout.CENTER);
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        JTable teachersTable = new JTable(model);
+        add(new JScrollPane(teachersTable), BorderLayout.CENTER);
     }
 
     private Connection getConnection() {
-        // Implement database connection logic here
-        return null;
+        try {
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
+            String user = "root";
+            String password = "root";
+            return DriverManager.getConnection(url, user, password);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Database connection failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MyTeachersScreen("YourStudentIdHere").setVisible(true));
+        SwingUtilities.invokeLater(() -> new MyTeachersScreen("studentId").setVisible(true));
     }
 }

@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Vector;
@@ -12,7 +13,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class MyModulesScreen extends JFrame {
-    private String studentId;
+    private final String studentId;
 
     public MyModulesScreen(String studentId) {
         this.studentId = studentId;
@@ -28,17 +29,15 @@ public class MyModulesScreen extends JFrame {
         columnNames.add("Module ID");
         columnNames.add("Module Name");
         columnNames.add("Description");
-        columnNames.add("Department");
 
         Vector<Vector<Object>> data = new Vector<>();
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(
-                 "SELECT m.id, m.name, m.description, d.name AS department " +
-                 "FROM Module m JOIN StudentModule sm ON m.id = sm.module_id " +
-                 "JOIN Department d ON m.department_id = d.id " +
-                 "WHERE sm.student_id = ?")) {
-            
+                 "SELECT m.id, m.name, m.description " +
+                 "FROM Module m JOIN StudentModuleRegistration smr ON m.id = smr.module_id " +
+                 "WHERE smr.student_id = ?")) {
+             
             pstmt.setString(1, studentId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -46,7 +45,6 @@ public class MyModulesScreen extends JFrame {
                     row.add(rs.getString("id"));
                     row.add(rs.getString("name"));
                     row.add(rs.getString("description"));
-                    row.add(rs.getString("department"));
                     data.add(row);
                 }
             }
@@ -61,9 +59,15 @@ public class MyModulesScreen extends JFrame {
     }
 
     private Connection getConnection() {
-        // Implement database connection logic here
-        // This is a placeholder for actual database connection
-        return null;
+        try {
+            String url = "jdbc:mysql://localhost:3306/universitymanagamentsystem";
+            String user = "root";
+            String password = "root";
+            return DriverManager.getConnection(url, user, password);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Database connection failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
     }
 
     public static void main(String[] args) {
