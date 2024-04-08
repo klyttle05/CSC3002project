@@ -1,9 +1,7 @@
-CREATE TABLE Event (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-    start_time TIMESTAMP,
-    end_time TIMESTAMP,
-    location_id BIGINT,
-    FOREIGN KEY (location_id) REFERENCES Room(id)
+CREATE TABLE EventParticipants (
+    participant_id INT AUTO_INCREMENT PRIMARY KEY,
+    activity_id INT NOT NULL,
+    student_id INT NOT NULL,
+    FOREIGN KEY (activity_id) REFERENCES ScheduledActivities(activity_id),
+    FOREIGN KEY (student_id) REFERENCES Students(student_id)
 );

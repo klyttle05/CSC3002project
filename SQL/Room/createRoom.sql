@@ -1,6 +1,6 @@
-CREATE TABLE Room (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE Rooms (
+    room_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     capacity INT,
-    location VARCHAR(255)
+    location_description TEXT
 );

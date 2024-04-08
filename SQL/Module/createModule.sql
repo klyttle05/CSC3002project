@@ -1,8 +1,7 @@
-CREATE TABLE Module (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    code VARCHAR(50) NOT NULL UNIQUE,
+CREATE TABLE Modules (
+    module_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    course_id BIGINT,
-    FOREIGN KEY (course_id) REFERENCES Course(id)
+    staff_id INT,
+    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id)
 );

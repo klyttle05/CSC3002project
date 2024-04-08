@@ -29,5 +29,8 @@
     ],
     "java.project.sourcePaths": [
         "backend"
+    ],
+    "dataworkspace.excludedProjects": [
+        "universitysystem/universitysystem.sqlproj"
     ]
 }
