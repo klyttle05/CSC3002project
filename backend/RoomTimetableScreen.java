@@ -59,22 +59,19 @@ public class RoomTimetableScreen extends JFrame {
 
         Vector<Vector<Object>> data = new Vector<>();
 
-        String sql = "SELECT title, start_time, end_time, 'Lesson' AS type FROM Lesson WHERE location_id = ?"
-                 + " UNION "
-                 + "SELECT title, start_time, end_time, 'Exam' AS type FROM Exam WHERE location_id = ?";
+        String sql = "SELECT title, start_time, end_time, type FROM ScheduledActivities WHERE room_id = ?";
 
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://universitymanagementsystem", "root", "root");
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, roomId);
-            pstmt.setString(2, roomId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Vector<Object> row = new Vector<>();
                     row.add(rs.getString("title"));
                     row.add(rs.getString("start_time"));
                     row.add(rs.getString("end_time"));
-                    row.add(rs.getString("type"));
+                    row.add(rs.getString("type")); // Now directly using 'type' from ScheduledActivities
                     data.add(row);
                 }
             }

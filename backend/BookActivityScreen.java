@@ -1,6 +1,7 @@
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.Date;
 
@@ -77,62 +78,62 @@ public class BookActivityScreen extends JFrame {
         String activityName = activityNameField.getText();
         String activityType = (String) activityTypeDropdown.getSelectedItem();
         Date startTime = (Date) startTimeSpinner.getValue();
-        String duration = durationField.getText(); // Only used for Exams
-        String moduleId = moduleField.getText(); // Used for Exams and Lessons, if applicable
-        String room = (String) roomDropdown.getSelectedItem();
-        
-        // Assuming getConnection() is a method that returns a Connection object to your database
-        try (Connection conn = getConnection()) {
-            String sql = "";
-            switch (activityType) {
-                case "Event":
-                    sql = "INSERT INTO Event (title, start_time, end_time, location_id) VALUES (?, ?, ?, ?)";
-                    break;
-                case "Exam":
-                    sql = "INSERT INTO Exam (title, duration_minutes, start_time, end_time, location_id, module_id) VALUES (?, ?, ?, ?, ?, ?)";
-                    break;
-                case "Lesson":
-                    sql = "INSERT INTO Lesson (title, start_time, end_time, location_id, module_id, instructor_id) VALUES (?, ?, ?, ?, ?, ?)";
-                    // Instructor ID needs to be handled, example placeholder added
-                    break;
+        int duration = !durationField.getText().isEmpty() ? Integer.parseInt(durationField.getText()) : 0; // For exams
+        String moduleId = noModuleRadio.isSelected() ? null : moduleField.getText();
+        String room = onlineRadio.isSelected() ? null : (String) roomDropdown.getSelectedItem();
+    
+        String sql = "INSERT INTO ScheduledActivities (title, start_time, end_time, type, room_id, module_id) VALUES (?, ?, ?, ?, ?, ?)";
+    
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    
+            pstmt.setString(1, activityName);
+            pstmt.setTimestamp(2, new java.sql.Timestamp(startTime.getTime()));
+            // For simplicity, assuming all activities last 1 hour if duration not specified
+            pstmt.setTimestamp(3, new java.sql.Timestamp(startTime.getTime() + (duration > 0 ? duration * 60000 : 3600000)));
+            pstmt.setString(4, activityType);
+            
+            // Handling "Online" option or specific room
+            if (room == null) {
+                pstmt.setNull(5, java.sql.Types.INTEGER);
+            } else {
+                // Assuming roomDropdown contains room_id as value. If it contains room names, a lookup query is required.
+                pstmt.setInt(5, Integer.parseInt(room));
             }
-
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, activityName);
-                pstmt.setTimestamp(2, new java.sql.Timestamp(startTime.getTime()));
-                // End time is not specified by the user; placeholder logic needed
-                pstmt.setTimestamp(3, new java.sql.Timestamp(startTime.getTime() + 3600000)); // +1 hour as placeholder
-                
-                if ("Exam".equals(activityType)) {
-                    pstmt.setInt(4, Integer.parseInt(duration));
-                    pstmt.setString(5, room); // Location ID needs matching with actual IDs
-                    pstmt.setString(6, moduleId);
-                } else if ("Lesson".equals(activityType)) {
-                    pstmt.setString(4, room); // Location ID
-                    pstmt.setString(5, moduleId);
-                    pstmt.setInt(6, 1); // Placeholder instructor ID
-                } else {
-                    pstmt.setString(4, room); // For Event, assuming 'Online' can be handled
-                }
-                
-                int affectedRows = pstmt.executeUpdate();
-                if (affectedRows > 0) {
-                    JOptionPane.showMessageDialog(this, "Activity booked successfully!");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Failed to book the activity.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+    
+            // Handling "No Module" option
+            if (moduleId == null) {
+                pstmt.setNull(6, java.sql.Types.INTEGER);
+            } else {
+                pstmt.setInt(6, Integer.parseInt(moduleId));
+            }
+    
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                JOptionPane.showMessageDialog(this, "Activity booked successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to book the activity.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error booking the activity: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
     }
+    
 
-    // Placeholder for the getConnection() method
     private Connection getConnection() {
-        // Implement database connection here
-        return null;
+        try {
+            String url = "jdbc:mysql://localhost:3306/yourDatabaseName?useSSL=false";
+            String user = "root";
+            String password = "password";
+            return DriverManager.getConnection(url, user, password);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Database connection failed", "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            return null;
+        }
     }
+    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BookActivityScreen().setVisible(true));

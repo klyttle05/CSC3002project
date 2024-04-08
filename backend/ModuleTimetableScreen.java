@@ -56,18 +56,20 @@ public class ModuleTimetableScreen extends JFrame {
         columnNames.add("Start Time");
         columnNames.add("End Time");
         columnNames.add("Type");
+        columnNames.add("Location"); // Added to display room location
 
         Vector<Vector<Object>> data = new Vector<>();
 
-        String sql = "SELECT title, start_time, end_time, 'Lesson' AS type FROM Lesson WHERE module_id = ?"
-                   + " UNION "
-                   + "SELECT title, start_time, end_time, 'Exam' AS type FROM Exam WHERE module_id = ?";
+        // Updated to join with the Rooms table to display room locations
+        String sql = "SELECT sa.title, sa.start_time, sa.end_time, sa.type, IFNULL(r.name, 'Online') AS location " +
+                     "FROM ScheduledActivities sa " +
+                     "LEFT JOIN Rooms r ON sa.room_id = r.room_id " +
+                     "WHERE sa.module_id = ?";
 
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://universitymanagementsystem", "root", "root");
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
              
             pstmt.setString(1, moduleId);
-            pstmt.setString(2, moduleId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Vector<Object> row = new Vector<>();
@@ -75,6 +77,7 @@ public class ModuleTimetableScreen extends JFrame {
                     row.add(rs.getString("start_time"));
                     row.add(rs.getString("end_time"));
                     row.add(rs.getString("type"));
+                    row.add(rs.getString("location"));
                     data.add(row);
                 }
             }
@@ -91,4 +94,3 @@ public class ModuleTimetableScreen extends JFrame {
         SwingUtilities.invokeLater(() -> new ModuleTimetableScreen().setVisible(true));
     }
 }
-
