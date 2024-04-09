@@ -51,37 +51,42 @@ public class LoginScreen extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String userId = userIdField.getText();
-        String password = new String(passwordField.getPassword());
+        try {
+            int userId = Integer.parseInt(userIdField.getText().trim());
+            String password = new String(passwordField.getPassword());
 
-        String userType = isValidCredentials(userId, password);
-        if (!userType.equals("Invalid")) {
-            MainMenu mainMenu = new MainMenu(userType, userId);
-            mainMenu.setVisible(true);
-            this.dispose(); // Close the login screen
-        } else {
-            JOptionPane.showMessageDialog(this, "Login failed! Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            String userType = isValidCredentials(userId, password);
+            if (!userType.equals("Invalid")) {
+                // Assuming MainMenu is appropriately set up to handle the user type and ID
+                MainMenu mainMenu = new MainMenu(userType, Integer.toString(userId));
+                mainMenu.setVisible(true);
+                this.dispose(); // Close the login screen
+            } else {
+                JOptionPane.showMessageDialog(this, "Login failed! Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid numeric ID.", "Input Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private String isValidCredentials(String userId, String password) {
-        // Try Staff first
+    private String isValidCredentials(int userId, String password) {
+        // Try to authenticate against Staff table first
         if (checkUserInTable(userId, password, "Staff")) {
             return "Admin";
         }
-        // Then try Students
+        // Then try Students table
         else if (checkUserInTable(userId, password, "Students")) {
             return "Student";
         }
-        // Invalid credentials
+        // If neither, return "Invalid"
         return "Invalid";
     }
 
-    private boolean checkUserInTable(String userId, String password, String tableName) {
+    private boolean checkUserInTable(int userId, String password, String tableName) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root")) {
             String sql = "SELECT password_hash FROM " + tableName + " WHERE id = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, userId);
+            pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
