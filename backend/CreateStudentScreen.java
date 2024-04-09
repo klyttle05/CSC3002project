@@ -13,18 +13,14 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 public class CreateStudentScreen extends JFrame {
-    private JTextField studentNumberField, firstNameField, lastNameField, emailField;
+    private JTextField firstNameField, lastNameField, emailField;
     private JPasswordField passwordField;
     private JButton submitButton;
 
     public CreateStudentScreen() {
         setTitle("Create New Student");
-        setSize(300, 250);
-        setLayout(new GridLayout(6, 2));
-
-        add(new JLabel("Student Number:"));
-        studentNumberField = new JTextField();
-        add(studentNumberField);
+        setSize(300, 200); // Adjusted size since student number field is removed
+        setLayout(new GridLayout(5, 2)); // Adjusted grid layout
 
         add(new JLabel("First Name:"));
         firstNameField = new JTextField();
@@ -51,30 +47,27 @@ public class CreateStudentScreen extends JFrame {
     }
 
     private void submitAction(ActionEvent e) {
-        String studentNumber = studentNumberField.getText();
         String firstName = firstNameField.getText();
         String lastName = lastNameField.getText();
         String email = emailField.getText();
         String password = new String(passwordField.getPassword());
 
-        // Assuming BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        // replace this with actual password hashing
-        String hashedPassword = password; // Use actual password hashing here
+        // Implement password hashing here
+        String hashedPassword = password; // Placeholder for hashed password
 
-        insertStudent(studentNumber, firstName, lastName, email, hashedPassword);
+        insertStudent(firstName, lastName, email, hashedPassword);
     }
 
-    private void insertStudent(String studentNumber, String firstName, String lastName, String email, String hashedPassword) {
-        String sql = "INSERT INTO Students (student_number, first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?, ?)";
+    private void insertStudent(String firstName, String lastName, String email, String hashedPassword) {
+        String sql = "INSERT INTO Student (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+        try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
              
-            pstmt.setString(1, studentNumber);
-            pstmt.setString(2, firstName);
-            pstmt.setString(3, lastName);
-            pstmt.setString(4, email);
-            pstmt.setString(5, hashedPassword);
+            pstmt.setString(1, firstName);
+            pstmt.setString(2, lastName);
+            pstmt.setString(3, email);
+            pstmt.setString(4, hashedPassword);
             
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
@@ -85,6 +78,19 @@ public class CreateStudentScreen extends JFrame {
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error creating student: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private Connection getConnection() {
+        try {
+            // Replace these with your actual database details
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
+            String user = "root";
+            String password = "root";
+            return DriverManager.getConnection(url, user, password);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Database connection failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
         }
     }
 
