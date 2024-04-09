@@ -3,6 +3,7 @@ import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -62,9 +63,9 @@ public class CreateStudentScreen extends JFrame {
 
     private void insertStudent(String firstName, String lastName, String email, String hashedPassword) {
         String sql = "INSERT INTO Students (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)";
-
+    
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
              
             pstmt.setString(1, firstName);
             pstmt.setString(2, lastName);
@@ -73,7 +74,14 @@ public class CreateStudentScreen extends JFrame {
             
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "Student created successfully.");
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        long newStudentId = generatedKeys.getLong(1);
+                        JOptionPane.showMessageDialog(this, "Student created successfully. Student ID: " + newStudentId);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Failed to retrieve student ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to create student.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -82,6 +90,7 @@ public class CreateStudentScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Error creating student: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new CreateStudentScreen().setVisible(true));

@@ -3,6 +3,7 @@ import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -67,20 +68,26 @@ public class CreateStaffScreen extends JFrame {
     }
 
     private void insertStaffMember(String firstName, String lastName, String email, String departmentId, String hashedPassword) {
-        String sql = "INSERT INTO Staff (first_name, last_name, email, department, password_hash) VALUES (?, ?, ?, ?, ?)";
-
+        String sql = "INSERT INTO Staff (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)";
+    
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
              
             pstmt.setString(1, firstName);
             pstmt.setString(2, lastName);
             pstmt.setString(3, email);
-            pstmt.setString(4, departmentId); // Adjust as per your schema, ensure this is the correct field and data type
-            pstmt.setString(5, hashedPassword);
+            pstmt.setString(4, hashedPassword);
             
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "Staff member created successfully.");
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        long newStaffId = generatedKeys.getLong(1);
+                        JOptionPane.showMessageDialog(this, "Staff member created successfully. Staff ID: " + newStaffId);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Failed to retrieve staff ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to create staff member.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -89,6 +96,7 @@ public class CreateStaffScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Error creating staff member: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new CreateStaffScreen().setVisible(true));
