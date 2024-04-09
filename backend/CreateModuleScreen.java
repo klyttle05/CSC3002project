@@ -9,8 +9,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
@@ -88,9 +86,9 @@ public class CreateModuleScreen extends JFrame {
     private void loadStaffMembers() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT staff_id, CONCAT(first_name, ' ', last_name) AS name FROM Staff")) {
+             ResultSet rs = stmt.executeQuery("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM Staff")) {
             while (rs.next()) {
-                String staffMember = rs.getInt("staff_id") + " - " + rs.getString("name");
+                String staffMember = rs.getInt("id") + " - " + rs.getString("name");
                 staffDropdown.addItem(staffMember);
             }
         } catch (SQLException e) {
@@ -102,9 +100,9 @@ public class CreateModuleScreen extends JFrame {
     private void loadRooms() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT room_id, room_name FROM Rooms")) {
+             ResultSet rs = stmt.executeQuery("SELECT room_id, name FROM Rooms")) {
             while (rs.next()) {
-                String room = rs.getInt("room_id") + " - " + rs.getString("room_name");
+                String room = rs.getInt("room_id") + " - " + rs.getString("name");
                 roomDropdown.addItem(room);
             }
         } catch (SQLException e) {
@@ -116,9 +114,9 @@ public class CreateModuleScreen extends JFrame {
     private void loadStudents() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT student_id, CONCAT(first_name, ' ', last_name) AS name FROM Students")) {
+             ResultSet rs = stmt.executeQuery("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM Students")) {
             while (rs.next()) {
-                studentListModel.addElement(new Student(rs.getInt("student_id"), rs.getString("name")));
+                studentListModel.addElement(new Student(rs.getInt("id"), rs.getString("name")));
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Failed to load students.", "Database Error", JOptionPane.ERROR_MESSAGE);
@@ -131,8 +129,12 @@ public class CreateModuleScreen extends JFrame {
         int staffId = Integer.parseInt(((String) staffDropdown.getSelectedItem()).split(" - ")[0]);
         int roomId = Integer.parseInt(((String) roomDropdown.getSelectedItem()).split(" - ")[0]);
         DayOfWeek dayOfWeek = DayOfWeek.valueOf(((String) dayOfWeekDropdown.getSelectedItem()).toUpperCase());
-        LocalTime startTime = LocalTime.parse((String) startTimeSpinner.getValue(), DateTimeFormatter.ofPattern("HH:mm"));
-        LocalTime endTime = LocalTime.parse((String) endTimeSpinner.getValue(), DateTimeFormatter.ofPattern("HH:mm"));
+        java.util.Date startTimeUtilDate = (java.util.Date) startTimeSpinner.getValue();
+        java.util.Date endTimeUtilDate = (java.util.Date) endTimeSpinner.getValue();
+        
+        // Convert java.util.Date to java.sql.Timestamp for DATETIME compatibility
+        java.sql.Timestamp startTime = new java.sql.Timestamp(startTimeUtilDate.getTime());
+        java.sql.Timestamp endTime = new java.sql.Timestamp(endTimeUtilDate.getTime());
         List<Student> selectedStudents = studentList.getSelectedValuesList();
 
         String insertModuleSql = "INSERT INTO Modules (name, staff_id) VALUES (?, ?)";
