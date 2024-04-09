@@ -3,17 +3,23 @@ import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
+import java.util.List;
 
-import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerDateModel;
 import javax.swing.SwingUtilities;
 
@@ -22,11 +28,12 @@ public class BookActivityScreen extends JFrame {
     private JComboBox<String> activityTypeDropdown, roomDropdown;
     private JSpinner startTimeSpinner;
     private JButton submitButton;
-    private JRadioButton noModuleRadio, onlineRadio;
+    private JList<Student> studentList;
+    private DefaultListModel<Student> studentListModel;
 
     public BookActivityScreen() {
         setTitle("Book Activity");
-        setSize(400, 400);
+        setSize(400, 600);
         initUI();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -56,63 +63,109 @@ public class BookActivityScreen extends JFrame {
         add(new JLabel("Module ID (for Exams and Lessons):"));
         moduleField = new JTextField();
         add(moduleField);
-        
+
         add(new JLabel("Room:"));
-        roomDropdown = new JComboBox<>(new String[]{"101", "102", "Online"}); // Example room numbers
+        roomDropdown = new JComboBox<>(new String[]{"101", "102", "Online"});
         add(roomDropdown);
 
-        noModuleRadio = new JRadioButton("No Module", true);
-        onlineRadio = new JRadioButton("Online", false);
-        ButtonGroup group = new ButtonGroup();
-        group.add(noModuleRadio);
-        group.add(onlineRadio);
-        add(noModuleRadio);
-        add(onlineRadio);
+        // Student selection setup
+        studentListModel = new DefaultListModel<>();
+        studentList = new JList<>(studentListModel);
+        studentList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        fetchStudents();
+        JScrollPane listScrollPane = new JScrollPane(studentList);
+        add(new JLabel("Select Students:"));
+        add(listScrollPane);
 
         submitButton = new JButton("Submit");
         submitButton.addActionListener(this::bookActivity);
         add(submitButton);
     }
 
+    private void fetchStudents() {
+        // Populate the studentListModel with student data from database
+        String sql = "SELECT student_id, first_name, last_name FROM Students ORDER BY last_name, first_name";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+             
+            while (rs.next()) {
+                int id = rs.getInt("student_id");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                studentListModel.addElement(new Student(id, firstName + " " + lastName));
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to fetch students: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
     private void bookActivity(ActionEvent e) {
-        String activityName = activityNameField.getText();
+        // Retrieve input values
+        String activityName = activityNameField.getText().trim();
         String activityType = (String) activityTypeDropdown.getSelectedItem();
         Date startTime = (Date) startTimeSpinner.getValue();
-        int duration = !durationField.getText().isEmpty() ? Integer.parseInt(durationField.getText()) : 0; // For exams
-        String moduleId = noModuleRadio.isSelected() ? null : moduleField.getText();
-        String room = onlineRadio.isSelected() ? null : (String) roomDropdown.getSelectedItem();
+        String durationStr = durationField.getText().trim();
+        int duration = durationStr.isEmpty() ? 0 : Integer.parseInt(durationStr);
+        String moduleIdStr = moduleField.getText().trim();
+        Integer moduleId = moduleIdStr.isEmpty() ? null : Integer.parseInt(moduleIdStr);
+        String room = (String) roomDropdown.getSelectedItem();
     
-        String sql = "INSERT INTO ScheduledActivities (title, start_time, end_time, type, room_id, module_id) VALUES (?, ?, ?, ?, ?, ?)";
+        // SQL for inserting the new activity
+        String sqlInsertActivity = "INSERT INTO ScheduledActivities (name, type, start_time, duration, module_id, room) VALUES (?, ?, ?, ?, ?, ?)";
     
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // SQL for linking students to the activity
+        String sqlInsertParticipant = "INSERT INTO EventParticipants (activity_id, student_id) VALUES (?, ?)";
     
-            pstmt.setString(1, activityName);
-            pstmt.setTimestamp(2, new java.sql.Timestamp(startTime.getTime()));
-            // For simplicity, assuming all activities last 1 hour if duration not specified
-            pstmt.setTimestamp(3, new java.sql.Timestamp(startTime.getTime() + (duration > 0 ? duration * 60000 : 3600000)));
-            pstmt.setString(4, activityType);
-            
-            // Handling "Online" option or specific room
-            if (room == null) {
-                pstmt.setNull(5, java.sql.Types.INTEGER);
-            } else {
-                // Assuming roomDropdown contains room_id as value. If it contains room names, a lookup query is required.
-                pstmt.setInt(5, Integer.parseInt(room));
-            }
+        try (Connection conn = getConnection()) {
+            // Disable auto-commit for transaction
+            conn.setAutoCommit(false);
     
-            // Handling "No Module" option
-            if (moduleId == null) {
-                pstmt.setNull(6, java.sql.Types.INTEGER);
-            } else {
-                pstmt.setInt(6, Integer.parseInt(moduleId));
-            }
+            // Insert the new activity
+            try (PreparedStatement pstmtActivity = conn.prepareStatement(sqlInsertActivity, Statement.RETURN_GENERATED_KEYS)) {
+                pstmtActivity.setString(1, activityName);
+                pstmtActivity.setString(2, activityType);
+                pstmtActivity.setTimestamp(3, new java.sql.Timestamp(startTime.getTime()));
+                pstmtActivity.setInt(4, duration);
+                if (moduleId != null) {
+                    pstmtActivity.setInt(5, moduleId);
+                } else {
+                    pstmtActivity.setNull(5, java.sql.Types.INTEGER);
+                }
+                pstmtActivity.setString(6, room.equals("Online") ? null : room); // Handle "Online" as null or specific logic
+                
+                int affectedRows = pstmtActivity.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Creating activity failed, no rows affected.");
+                }
     
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "Activity booked successfully!");
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to book the activity.", "Error", JOptionPane.ERROR_MESSAGE);
+                // Retrieve the generated activity ID
+                try (ResultSet generatedKeys = pstmtActivity.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        long activityId = generatedKeys.getLong(1);
+    
+                        // Insert selected students into EventParticipants
+                        List<Student> selectedStudents = studentList.getSelectedValuesList();
+                        try (PreparedStatement pstmtParticipant = conn.prepareStatement(sqlInsertParticipant)) {
+                            for (Student student : selectedStudents) {
+                                pstmtParticipant.setLong(1, activityId);
+                                pstmtParticipant.setInt(2, student.id);
+                                pstmtParticipant.addBatch();
+                            }
+                            pstmtParticipant.executeBatch();
+                        }
+                    } else {
+                        throw new SQLException("Creating activity failed, no ID obtained.");
+                    }
+                }
+    
+                // Commit transaction
+                conn.commit();
+                JOptionPane.showMessageDialog(this, "Activity and participants added successfully!");
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw ex;
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error booking the activity: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -133,10 +186,24 @@ public class BookActivityScreen extends JFrame {
             return null;
         }
     }
-    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BookActivityScreen().setVisible(true));
     }
-}
 
+    // Inner class to represent students
+    class Student {
+        int id;
+        String name;
+
+        Student(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name + " (" + id + ")";
+        }
+    }
+}
