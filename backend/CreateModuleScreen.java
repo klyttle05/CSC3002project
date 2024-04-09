@@ -1,5 +1,4 @@
 import java.awt.GridLayout;
-import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -134,13 +134,15 @@ public class CreateModuleScreen extends JFrame {
         LocalTime startTime = LocalTime.parse((String) startTimeSpinner.getValue(), DateTimeFormatter.ofPattern("HH:mm"));
         LocalTime endTime = LocalTime.parse((String) endTimeSpinner.getValue(), DateTimeFormatter.ofPattern("HH:mm"));
         List<Student> selectedStudents = studentList.getSelectedValuesList();
-    
+
         String insertModuleSql = "INSERT INTO Modules (name, staff_id) VALUES (?, ?)";
         String insertScheduledActivitySql = "INSERT INTO ScheduledActivities (type, title, start_time, end_time, location, module_id, staff_id, room_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         String insertStudentModuleRegistrationSql = "INSERT INTO StudentModuleRegistrations (student_id, module_id) VALUES (?, ?)";
         String insertEventParticipantSql = "INSERT INTO EventParticipants (activity_id, student_id) VALUES (?, ?)";
     
-        try (Connection conn = getConnection()) {
+        Connection conn = null;
+        try {
+            conn = getConnection();
             conn.setAutoCommit(false);
     
             // Insert module
