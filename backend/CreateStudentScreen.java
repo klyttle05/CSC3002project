@@ -12,6 +12,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 public class CreateStudentScreen extends JFrame {
     private JTextField firstNameField, lastNameField, emailField;
     private JPasswordField passwordField;
@@ -52,8 +54,8 @@ public class CreateStudentScreen extends JFrame {
         String email = emailField.getText();
         String password = new String(passwordField.getPassword());
 
-        // Implement password hashing here
-        String hashedPassword = password; // Placeholder for hashed password
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(password);
 
         insertStudent(firstName, lastName, email, hashedPassword);
     }
@@ -61,7 +63,7 @@ public class CreateStudentScreen extends JFrame {
     private void insertStudent(String firstName, String lastName, String email, String hashedPassword) {
         String sql = "INSERT INTO Students (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = getConnection();
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
              
             pstmt.setString(1, firstName);
@@ -78,19 +80,6 @@ public class CreateStudentScreen extends JFrame {
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error creating student: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private Connection getConnection() {
-        try {
-            // Replace these with your actual database details
-            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
-            String user = "root";
-            String password = "root";
-            return DriverManager.getConnection(url, user, password);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Database connection failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return null;
         }
     }
 

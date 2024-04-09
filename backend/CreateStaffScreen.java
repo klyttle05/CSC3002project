@@ -12,6 +12,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 public class CreateStaffScreen extends JFrame {
     private JTextField firstNameField, lastNameField, emailField, departmentIdField;
     private JPasswordField passwordField;
@@ -54,12 +56,12 @@ public class CreateStaffScreen extends JFrame {
         String firstName = firstNameField.getText();
         String lastName = lastNameField.getText();
         String email = emailField.getText();
-        String departmentId = departmentIdField.getText();
+        String departmentId = departmentIdField.getText(); // Department handling might need adjustment based on your schema
         String password = new String(passwordField.getPassword());
 
-        // Placeholder for the BCrypt password encoder
-        // Assume BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = password; // Use actual password hashing here
+        // Hashing the password
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(password);
 
         insertStaffMember(firstName, lastName, email, departmentId, hashedPassword);
     }
@@ -73,7 +75,7 @@ public class CreateStaffScreen extends JFrame {
             pstmt.setString(1, firstName);
             pstmt.setString(2, lastName);
             pstmt.setString(3, email);
-            pstmt.setString(4, departmentId);
+            pstmt.setString(4, departmentId); // Adjust as per your schema, ensure this is the correct field and data type
             pstmt.setString(5, hashedPassword);
             
             int affectedRows = pstmt.executeUpdate();

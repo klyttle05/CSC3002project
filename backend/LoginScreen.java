@@ -2,6 +2,10 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,9 +16,11 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 public class LoginScreen extends JFrame implements ActionListener {
     
-    private JTextField userIdField; // Assuming you have a field for User ID or Username
+    private JTextField userIdField;
     private JPasswordField passwordField;
     private JButton loginButton;
     
@@ -22,11 +28,8 @@ public class LoginScreen extends JFrame implements ActionListener {
         setTitle("Login");
         setSize(300, 150);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Center the window
+        setLocationRelativeTo(null);
         
-        setLayout(new BorderLayout());
-        
-        // Panel for inputs
         JPanel inputPanel = new JPanel(new GridLayout(2, 2));
         inputPanel.add(new JLabel("User ID:"));
         userIdField = new JTextField();
@@ -38,7 +41,6 @@ public class LoginScreen extends JFrame implements ActionListener {
         
         add(inputPanel, BorderLayout.CENTER);
         
-        // Panel for login button
         JPanel buttonPanel = new JPanel();
         loginButton = new JButton("Login");
         loginButton.addActionListener(this);
@@ -52,29 +54,46 @@ public class LoginScreen extends JFrame implements ActionListener {
         String userId = userIdField.getText();
         String password = new String(passwordField.getPassword());
 
-        // Authentication logic here
-        if (isValidCredentials(userId, password)) {
-            String userType = determineUserType(userId); // Implement this based on logic
+        String userType = isValidCredentials(userId, password);
+        if (!userType.equals("Invalid")) {
             MainMenu mainMenu = new MainMenu(userType, userId);
             mainMenu.setVisible(true);
             this.dispose(); // Close the login screen
         } else {
-            JOptionPane.showMessageDialog(this, "Login failed!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Login failed! Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // Placeholder for credentials validation method
-    private boolean isValidCredentials(String userId, String password) {
-        // Implement validation logic here
-        // For demonstration purposes, let's assume any input is valid
-        return true;
+    private String isValidCredentials(String userId, String password) {
+        // Try Staff first
+        if (checkUserInTable(userId, password, "Staff")) {
+            return "Admin";
+        }
+        // Then try Students
+        else if (checkUserInTable(userId, password, "Students")) {
+            return "Student";
+        }
+        // Invalid credentials
+        return "Invalid";
     }
 
-    // Placeholder for determining user type
-    private String determineUserType(String userId) {
-        // Implement logic to determine if the user is an Admin or Student
-        // For demonstration, return "Admin" or "Student" based on some condition
-        return userId.startsWith("A") ? "Admin" : "Student";
+    private boolean checkUserInTable(String userId, String password, String tableName) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root")) {
+            String sql = "SELECT password_hash FROM " + tableName + " WHERE id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String storedHash = rs.getString("password_hash");
+                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+                return encoder.matches(password, storedHash);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database connection error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
     }
 
     public static void main(String[] args) {
