@@ -59,7 +59,7 @@ public class CreateStudentScreen extends JFrame {
     }
 
     private void insertStudent(String firstName, String lastName, String email, String hashedPassword) {
-        String sql = "INSERT INTO Student (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Students (first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
