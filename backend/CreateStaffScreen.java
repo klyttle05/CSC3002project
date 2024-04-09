@@ -34,7 +34,7 @@ public class CreateStaffScreen extends JFrame {
         emailField = new JTextField();
         add(emailField);
 
-        add(new JLabel("Department ID:"));
+        add(new JLabel("Department:"));
         departmentIdField = new JTextField();
         add(departmentIdField);
 
