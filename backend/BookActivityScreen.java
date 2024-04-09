@@ -139,7 +139,7 @@ public class BookActivityScreen extends JFrame {
         int staffId = Integer.parseInt(staffIdStr);
     
         // SQL to insert the new activity
-        String sqlInsertActivity = "INSERT INTO ScheduledActivities (name, type, start_time, end_time, staff_id) VALUES (?, ?, ?, ?, ?)";
+        String sqlInsertActivity = "INSERT INTO ScheduledActivities (title, type, start_time, end_time, staff_id) VALUES (?, ?, ?, ?, ?)";
     
         try (Connection conn = getConnection()) {
             // Insert the activity

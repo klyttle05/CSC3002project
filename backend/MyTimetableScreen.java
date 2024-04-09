@@ -74,7 +74,7 @@ public class MyTimetableScreen extends JFrame {
         LocalDateTime weekStart = LocalDateTime.of(currentDate, LocalTime.of(8, 0));
         LocalDateTime weekEnd = LocalDateTime.of(currentDate.plusDays(4), LocalTime.of(18, 0)); // From Monday 8am to Friday 6pm
     
-        String sql = "SELECT sa.start_time, sa.end_time, m.name AS moduleName, IFNULL(r.name, 'Online') AS location, sa.activity_name " +
+        String sql = "SELECT sa.start_time, sa.end_time, m.name AS moduleName, IFNULL(r.name, 'Online') AS location, sa.title " +
                      "FROM ScheduledActivities sa " +
                      "JOIN Modules m ON sa.module_id = m.module_id " +
                      "LEFT JOIN Rooms r ON sa.room_id = r.room_id " +

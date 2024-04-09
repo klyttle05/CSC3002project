@@ -32,16 +32,16 @@ public class MyTeachersScreen extends JFrame {
 
         Vector<Vector<Object>> data = new Vector<>();
 
-        String sql = "SELECT DISTINCT s.name AS TeacherName, m.name AS Module, s.email " +
+        String sql = "SELECT DISTINCT s.last_name AS TeacherName, m.name AS Module, s.email " +
                      "FROM Staff s " +
-                     "JOIN Module m ON m.staff_id = s.id " + 
-                     "JOIN StudentModuleRegistration smr ON smr.module_id = m.id " +
+                     "JOIN Modules m ON m.staff_id = s.id " + 
+                     "JOIN StudentModuleRegistrations smr ON smr.module_id = m.module_id " +
                      "WHERE smr.student_id = ? " +
                      "UNION " +
-                     "SELECT DISTINCT s.name, '', s.email " + // Modules might not be directly related to some ScheduledActivities
-                     "FROM ScheduledActivity sa " +
+                     "SELECT DISTINCT s.last_name, '', s.email " + // Modules might not be directly related to some ScheduledActivities
+                     "FROM ScheduledActivities sa " +
                      "JOIN Staff s ON sa.staff_id = s.id " +
-                     "WHERE EXISTS (SELECT 1 FROM StudentModuleRegistration smr WHERE smr.student_id = ? AND smr.module_id = sa.module_id)";
+                     "WHERE EXISTS (SELECT 1 FROM StudentModuleRegistrations smr WHERE smr.student_id = ? AND smr.module_id = sa.module_id)";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
