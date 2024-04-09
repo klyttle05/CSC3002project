@@ -101,7 +101,7 @@ public class StudentTimetableScreen extends JFrame {
 
     private Connection getConnection() {
         try {
-            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem?useSSL=false";
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
             String user = "root";
             String password = "root";
             return DriverManager.getConnection(url, user, password);

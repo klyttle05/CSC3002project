@@ -123,9 +123,9 @@ public class BookActivityScreen extends JFrame {
 
     private Connection getConnection() {
         try {
-            String url = "jdbc:mysql://localhost:3306/yourDatabaseName?useSSL=false";
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
             String user = "root";
-            String password = "password";
+            String password = "root";
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Database connection failed", "Error", JOptionPane.ERROR_MESSAGE);
