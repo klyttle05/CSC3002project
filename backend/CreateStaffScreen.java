@@ -54,7 +54,7 @@ public class CreateStaffScreen extends JFrame {
         String firstName = firstNameField.getText();
         String lastName = lastNameField.getText();
         String email = emailField.getText();
-        long departmentId = Long.parseLong(departmentIdField.getText());
+        String departmentId = departmentIdField.getText();
         String password = new String(passwordField.getPassword());
 
         // Placeholder for the BCrypt password encoder
@@ -64,8 +64,8 @@ public class CreateStaffScreen extends JFrame {
         insertStaffMember(firstName, lastName, email, departmentId, hashedPassword);
     }
 
-    private void insertStaffMember(String firstName, String lastName, String email, long departmentId, String hashedPassword) {
-        String sql = "INSERT INTO Staff (first_name, last_name, email, department_id, password_hash) VALUES (?, ?, ?, ?, ?)";
+    private void insertStaffMember(String firstName, String lastName, String email, String departmentId, String hashedPassword) {
+        String sql = "INSERT INTO Staff (first_name, last_name, email, department, password_hash) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -73,7 +73,7 @@ public class CreateStaffScreen extends JFrame {
             pstmt.setString(1, firstName);
             pstmt.setString(2, lastName);
             pstmt.setString(3, email);
-            pstmt.setLong(4, departmentId);
+            pstmt.setString(4, departmentId);
             pstmt.setString(5, hashedPassword);
             
             int affectedRows = pstmt.executeUpdate();
