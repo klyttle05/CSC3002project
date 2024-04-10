@@ -34,7 +34,7 @@ public class MyModulesScreen extends JFrame {
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(
-                 "SELECT m.id, m.name, m.description " +
+                 "SELECT m.module_id, m.name, m.description " +
                  "FROM Modules m JOIN StudentModuleRegistrations smr ON m.module_id = smr.module_id " +
                  "WHERE smr.student_id = ?")) {
             
