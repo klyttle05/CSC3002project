@@ -37,6 +37,7 @@ public class MainMenu extends JFrame {
             addButton(panel, "Search Student Timetable", e -> searchStudentTimetable());
             addButton(panel, "Create Staff User", e -> openCreateStaffScreen());
             addButton(panel, "Create Student User", e -> openCreateStudentScreen());
+            addButton(panel, "Create Module Schedule", e -> openCreateModuleScreen());
         } else if ("Student".equals(userType)) {
             addButton(panel, "Your Teachers", e -> showTeachers());
             addButton(panel, "Your Modules", e -> showModules());
@@ -91,6 +92,11 @@ public class MainMenu extends JFrame {
     private void openCreateStudentScreen() {
         CreateStudentScreen createStudentScreen = new CreateStudentScreen();
         createStudentScreen.setVisible(true);
+    }
+
+    private void openCreateModuleScreen() {
+        CreateModuleScreen createModuleScreen = new CreateModuleScreen();
+        createModuleScreen.setVisible(true);
     }
 
     // Method to display the teachers associated with the logged-in student

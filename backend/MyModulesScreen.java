@@ -13,9 +13,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class MyModulesScreen extends JFrame {
-    private final String studentId;
+    private final int studentId; // Assuming studentId should be an integer.
 
-    public MyModulesScreen(String studentId) {
+    public MyModulesScreen(int studentId) {
         this.studentId = studentId;
         setTitle("My Modules");
         setSize(600, 300);
@@ -37,8 +37,8 @@ public class MyModulesScreen extends JFrame {
                  "SELECT m.id, m.name, m.description " +
                  "FROM Module m JOIN StudentModuleRegistration smr ON m.id = smr.module_id " +
                  "WHERE smr.student_id = ?")) {
-             
-            pstmt.setString(1, studentId);
+            
+            pstmt.setInt(1, studentId); // Corrected for integer studentId
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Vector<Object> row = new Vector<>();
@@ -60,7 +60,7 @@ public class MyModulesScreen extends JFrame {
 
     private Connection getConnection() {
         try {
-            String url = "jdbc:mysql://localhost:3306/universitymanagamentsystem";
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem"; // Corrected database name
             String user = "root";
             String password = "root";
             return DriverManager.getConnection(url, user, password);
@@ -71,6 +71,7 @@ public class MyModulesScreen extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MyModulesScreen("YourStudentIdHere").setVisible(true));
+        // You should replace "YourStudentIdHere" with an actual integer studentId when calling this screen.
+        SwingUtilities.invokeLater(() -> new MyModulesScreen(1).setVisible(true)); // Example with a hardcoded studentId
     }
 }
