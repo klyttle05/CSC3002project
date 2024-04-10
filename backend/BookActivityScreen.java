@@ -9,7 +9,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -33,7 +32,6 @@ public class BookActivityScreen extends JFrame {
     private DefaultListModel<Student> studentListModel;
     private JList<Student> studentList;
     private JRadioButton onlineRadioButton;
-    private ButtonGroup activityLocationGroup;
 
     public BookActivityScreen() {
         initializeUI();
@@ -254,6 +252,46 @@ public class BookActivityScreen extends JFrame {
         return false; // Default to false if there's an error or if the room is not available.
     }
     
+    private void checkRoomAvailability(ActionEvent e) {
+        // Check if the activity is online and bypass room availability check
+        if (onlineRadioButton.isSelected()) {
+            JOptionPane.showMessageDialog(this, "The activity is online. Room availability check is not required.", "Online Activity", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+    
+        // Extract information from UI components
+        int roomId = Integer.parseInt(((String) roomDropdown.getSelectedItem()).split(" - ")[0]);
+        Timestamp desiredStartTime = new Timestamp(((Date) startTimeSpinner.getValue()).getTime());
+        Timestamp desiredEndTime = new Timestamp(((Date) endTimeSpinner.getValue()).getTime());
+    
+        // SQL query to check for overlapping bookings for the selected room
+        String query = "SELECT COUNT(*) FROM ScheduledActivities " +
+                       "WHERE room_id = ? AND NOT ((end_time <= ?) OR (start_time >= ?))";
+    
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, roomId);
+            pstmt.setTimestamp(2, desiredStartTime);
+            pstmt.setTimestamp(3, desiredEndTime);
+    
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                int overlappingBookings = rs.getInt(1);
+                if (overlappingBookings == 0) {
+                    // If there are no overlapping bookings, the room is available
+                    JOptionPane.showMessageDialog(this, "The selected room is available for the desired time.", "Room Available", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    // If there are overlapping bookings, the room is not available
+                    JOptionPane.showMessageDialog(this, "The selected room is not available for the desired time.", "Room Not Available", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error checking room availability: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BookActivityScreen().setVisible(true));
     }
