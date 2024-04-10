@@ -39,13 +39,62 @@ public class ClashDetectionScreen extends JFrame {
         add(new JScrollPane(studentClashesTable));
         add(new JScrollPane(staffClashesTable));
 
-        // Set table visibility based on user role
-        staffClashesTable.setVisible(isStaff);
+        // Only display staff clashes table to staff members
+        staffClashesTable.setVisible(isStaff); 
     }
 
     private void loadStudentClashes() {
-        // Method implementation to load student clashes (similar to previous example)
-        // Adjust SQL query if needed to cater to the specific requirements for student clashes
+        String studentClashesQuery;
+        if (isStaff) {
+            // Staff member query retrieves all student clashes
+            studentClashesQuery = """
+                SELECT ep.student_id, sa1.activity_id AS activity1_id, sa2.activity_id AS activity2_id, 
+                       CONCAT(sa1.start_time, ' to ', sa2.end_time) AS overlap_period
+                FROM EventParticipants ep
+                JOIN ScheduledActivities sa1 ON ep.activity_id = sa1.activity_id
+                JOIN ScheduledActivities sa2 ON sa1.activity_id != sa2.activity_id
+                WHERE sa1.end_time > sa2.start_time AND sa1.start_time < sa2.end_time
+                GROUP BY ep.student_id, sa1.activity_id, sa2.activity_id
+                ORDER BY ep.student_id, overlap_period;
+                """;
+        } else {
+            // Student user query retrieves only their clashes
+            studentClashesQuery = """
+                SELECT ep.student_id, sa1.activity_id AS activity1_id, sa2.activity_id AS activity2_id, 
+                       CONCAT(sa1.start_time, ' to ', sa2.end_time) AS overlap_period
+                FROM EventParticipants ep
+                JOIN ScheduledActivities sa1 ON ep.activity_id = sa1.activity_id
+                JOIN ScheduledActivities sa2 ON sa1.activity_id != sa2.activity_id
+                WHERE sa1.end_time > sa2.start_time AND sa1.start_time < sa2.end_time
+                AND ep.student_id = ?
+                GROUP BY ep.student_id, sa1.activity_id, sa2.activity_id
+                ORDER BY ep.student_id, overlap_period;
+                """;
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(studentClashesQuery)) {
+             
+            if (!isStaff) {
+                pstmt.setInt(1, userId); // Set the student's userID for the query
+            }
+
+            ResultSet rs = pstmt.executeQuery();
+            DefaultTableModel model = (DefaultTableModel) studentClashesTable.getModel();
+            model.setRowCount(0); // Clear previous data
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("student_id"),
+                    rs.getString("activity1_id"),
+                    rs.getString("activity2_id"),
+                    rs.getString("overlap_period")
+                });
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void loadStaffClashes() {
