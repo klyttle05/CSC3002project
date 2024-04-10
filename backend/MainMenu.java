@@ -107,7 +107,8 @@ public class MainMenu extends JFrame {
 
     // Method to display the timetable for the logged-in student
     private void showStudentTimetable() {
-        MyTimetableScreen myTimetableScreen = new MyTimetableScreen(userId);
+        int userIDint = Integer.parseInt(userId);
+        MyTimetableScreen myTimetableScreen = new MyTimetableScreen(userIDint);
         myTimetableScreen.setVisible(true);
     }
     public static void main(String[] args) {
