@@ -74,8 +74,6 @@ public class ClashDetectionScreen extends JFrame {
     }
 
     private String getStaffClashesQuery() {
-        // Adapt this query based on your schema to find staff clashes
-        // The logic is similar to student clashes but focuses on staff's activities
         return "SELECT DISTINCT sa1.staff_id AS staff_id, sa1.activity_id AS activity1_id, sa2.activity_id AS activity2_id, " +
                "'Overlap Detected' AS overlap_period " +
                "FROM ScheduledActivities sa1 " +
