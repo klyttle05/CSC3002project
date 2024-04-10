@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -26,15 +27,17 @@ import javax.swing.SwingUtilities;
 
 public class BookActivityScreen extends JFrame {
     private JTextField activityNameField;
-    private JComboBox<String> activityTypeDropdown, staffDropdown;
+    private JComboBox<String> activityTypeDropdown, staffDropdown, roomDropdown;
     private JSpinner startTimeSpinner, endTimeSpinner;
-    private JButton submitButton;
+    private JButton submitButton, checkAvailabilityButton;
     private DefaultListModel<Student> studentListModel;
     private JList<Student> studentList;
+    private JRadioButton onlineRadioButton;
+    private ButtonGroup activityLocationGroup;
 
     public BookActivityScreen() {
         initializeUI();
-        setSize(400, 600);
+        setSize(400, 700); // Adjusted for additional components
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
     }
@@ -65,12 +68,32 @@ public class BookActivityScreen extends JFrame {
         loadStaffMembers();
         add(staffDropdown);
 
+        add(new JLabel("Room:"));
+        roomDropdown = new JComboBox<>();
+        loadRooms();
+        add(roomDropdown);
+
+        onlineRadioButton = new JRadioButton("Online Activity");
+        onlineRadioButton.addActionListener(e -> {
+            if (onlineRadioButton.isSelected()) {
+                roomDropdown.setEnabled(false);
+                roomDropdown.setSelectedItem("Room 1"); // Assuming "Room 1" is your designated online activity room.
+            } else {
+                roomDropdown.setEnabled(true);
+            }
+        });
+        add(onlineRadioButton);
+
         studentListModel = new DefaultListModel<>();
         studentList = new JList<>(studentListModel);
         studentList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         JScrollPane scrollPane = new JScrollPane(studentList);
         add(new JLabel("Select Students:"));
         add(scrollPane);
+
+        checkAvailabilityButton = new JButton("Check Room Availability");
+        checkAvailabilityButton.addActionListener(this::checkRoomAvailability);
+        add(checkAvailabilityButton);
 
         submitButton = new JButton("Submit");
         submitButton.addActionListener(this::bookActivity);
@@ -115,8 +138,28 @@ public class BookActivityScreen extends JFrame {
         }
     }
     
+    private void loadRooms() {
+        String sql = "SELECT room_id, name FROM Rooms ORDER BY name";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+             
+            roomDropdown.addItem("Room 1 - Online"); 
+            
+            while (rs.next()) {
+                int roomId = rs.getInt("room_id");
+                String roomName = rs.getString("name");
+                roomDropdown.addItem(roomId + " - " + roomName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading rooms: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+
     private Connection getConnection() {
-        // Example connection method, adjust with your actual database credentials
         try {
             String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
             String user = "root";
@@ -133,62 +176,84 @@ public class BookActivityScreen extends JFrame {
     private void bookActivity(ActionEvent e) {
         String activityName = activityNameField.getText().trim();
         String activityType = (String) activityTypeDropdown.getSelectedItem();
-        Timestamp startTime = new Timestamp(((Date) startTimeSpinner.getValue()).getTime());
-        Timestamp endTime = new Timestamp(((Date) endTimeSpinner.getValue()).getTime());
-        String staffIdStr = ((String) staffDropdown.getSelectedItem()).split(" - ")[0];
-        int staffId = Integer.parseInt(staffIdStr);
+        Date startTime = (Date) startTimeSpinner.getValue();
+        Date endTime = (Date) endTimeSpinner.getValue();
+        int staffId = Integer.parseInt(((String) staffDropdown.getSelectedItem()).split(" - ")[0]);
+        boolean isOnline = onlineRadioButton.isSelected();
+        int roomId = isOnline ? 1 : Integer.parseInt(((String) roomDropdown.getSelectedItem()).split(" - ")[0]);
+        
+        Timestamp startTimestamp = new Timestamp(startTime.getTime());
+        Timestamp endTimestamp = new Timestamp(endTime.getTime());
     
-        // SQL to insert the new activity
-        String sqlInsertActivity = "INSERT INTO ScheduledActivities (title, type, start_time, end_time, staff_id) VALUES (?, ?, ?, ?, ?)";
-    
-        try (Connection conn = getConnection()) {
-            // Insert the activity
-            try (PreparedStatement pstmtActivity = conn.prepareStatement(sqlInsertActivity, Statement.RETURN_GENERATED_KEYS)) {
-                pstmtActivity.setString(1, activityName);
-                pstmtActivity.setString(2, activityType);
-                pstmtActivity.setTimestamp(3, startTime);
-                pstmtActivity.setTimestamp(4, endTime);
-                pstmtActivity.setInt(5, staffId);
-    
-                int affectedRows = pstmtActivity.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new SQLException("Creating activity failed, no rows affected.");
-                }
-    
-                // Retrieve the generated activity ID
-                try (ResultSet generatedKeys = pstmtActivity.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        long activityId = generatedKeys.getLong(1);
-    
-                        // Insert selected students into EventParticipants
-                        List<Student> selectedStudents = studentList.getSelectedValuesList();
-                        if (!selectedStudents.isEmpty()) {
-                            insertEventParticipants(conn, activityId, selectedStudents);
-                        }
-    
-                        JOptionPane.showMessageDialog(this, "Activity booked successfully.");
-                    } else {
-                        throw new SQLException("Creating activity failed, no ID obtained.");
-                    }
-                }
+        if (!isOnline && !isRoomAvailable(roomId, startTimestamp, endTimestamp)) {
+            JOptionPane.showMessageDialog(this, "Selected room is not available at the specified time.", "Room Unavailable", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Proceed with booking the activity
+        String sql = "INSERT INTO ScheduledActivities (type, title, start_time, end_time, staff_id, room_id) VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, activityType);
+            pstmt.setString(2, activityName);
+            pstmt.setTimestamp(3, startTimestamp);
+            pstmt.setTimestamp(4, endTimestamp);
+            pstmt.setInt(5, staffId);
+            pstmt.setInt(6, roomId);
+            pstmt.executeUpdate();
+            
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                long activityId = rs.getLong(1);
+                insertEventParticipants(activityId); // Call to insert event participants
             }
+    
+            JOptionPane.showMessageDialog(this, "Activity booked successfully.", "Booking Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error booking the activity: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error booking activity: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    private void insertEventParticipants(Connection conn, long activityId, List<Student> selectedStudents) throws SQLException {
-        String sqlInsertParticipant = "INSERT INTO EventParticipants (activity_id, student_id) VALUES (?, ?)";
-        try (PreparedStatement pstmtParticipant = conn.prepareStatement(sqlInsertParticipant)) {
-            for (Student student : selectedStudents) {
-                pstmtParticipant.setLong(1, activityId);
-                pstmtParticipant.setInt(2, student.id);
-                pstmtParticipant.executeUpdate();
+    private void insertEventParticipants(long activityId) throws SQLException {
+        String sql = "INSERT INTO EventParticipants (activity_id, student_id) VALUES (?, ?)";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            for (Student student : studentList.getSelectedValuesList()) {
+                pstmt.setLong(1, activityId);
+                pstmt.setInt(2, student.id); 
+                pstmt.executeUpdate();
             }
         }
+        // Note: The Connection and PreparedStatement are auto-closed thanks to try-with-resources.
     }
-
+    
+    private boolean isRoomAvailable(int roomId, Timestamp desiredStartTime, Timestamp desiredEndTime) {
+        String query = "SELECT COUNT(*) FROM ScheduledActivities " +
+                       "WHERE room_id = ? AND NOT ((end_time <= ?) OR (start_time >= ?))";
+    
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+             
+            pstmt.setInt(1, roomId);
+            pstmt.setTimestamp(2, desiredStartTime);
+            pstmt.setTimestamp(3, desiredEndTime);
+    
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // If count is 0, there are no overlapping bookings, so the room is available.
+                    return rs.getInt(1) == 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error checking room availability: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false; // Default to false if there's an error or if the room is not available.
+    }
+    
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BookActivityScreen().setVisible(true));
     }
