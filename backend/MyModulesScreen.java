@@ -42,7 +42,7 @@ public class MyModulesScreen extends JFrame {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Vector<Object> row = new Vector<>();
-                    row.add(rs.getString("id"));
+                    row.add(rs.getString("module_id"));
                     row.add(rs.getString("name"));
                     row.add(rs.getString("description"));
                     data.add(row);
