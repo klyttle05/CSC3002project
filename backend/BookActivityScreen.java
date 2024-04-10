@@ -143,7 +143,6 @@ public class BookActivityScreen extends JFrame {
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
              
-            roomDropdown.addItem("Room 1 - Online"); 
             
             while (rs.next()) {
                 int roomId = rs.getInt("room_id");
