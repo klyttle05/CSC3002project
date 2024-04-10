@@ -107,7 +107,8 @@ public class MainMenu extends JFrame {
 
     // Method to display the modules registered by the logged-in student
     private void showModules() {
-        MyModulesScreen myModulesScreen = new MyModulesScreen(userId);
+        int userIDint = Integer.parseInt(userId);
+        MyModulesScreen myModulesScreen = new MyModulesScreen(userIDint);
         myModulesScreen.setVisible(true);
     }
 
