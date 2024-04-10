@@ -35,7 +35,7 @@ public class MyModulesScreen extends JFrame {
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(
                  "SELECT m.id, m.name, m.description " +
-                 "FROM Module m JOIN StudentModuleRegistration smr ON m.id = smr.module_id " +
+                 "FROM Modules m JOIN StudentModuleRegistration smr ON m.id = smr.module_id " +
                  "WHERE smr.student_id = ?")) {
             
             pstmt.setInt(1, studentId); // Corrected for integer studentId
@@ -71,7 +71,6 @@ public class MyModulesScreen extends JFrame {
     }
 
     public static void main(String[] args) {
-        // You should replace "YourStudentIdHere" with an actual integer studentId when calling this screen.
         SwingUtilities.invokeLater(() -> new MyModulesScreen(1).setVisible(true)); // Example with a hardcoded studentId
     }
 }
