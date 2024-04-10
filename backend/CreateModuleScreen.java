@@ -9,8 +9,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -129,14 +130,14 @@ public class CreateModuleScreen extends JFrame {
         int staffId = Integer.parseInt(((String) staffDropdown.getSelectedItem()).split(" - ")[0]);
         int roomId = Integer.parseInt(((String) roomDropdown.getSelectedItem()).split(" - ")[0]);
         DayOfWeek dayOfWeek = DayOfWeek.valueOf(((String) dayOfWeekDropdown.getSelectedItem()).toUpperCase());
+        
+        // Extracting java.util.Date from the JSpinner and converting to LocalDateTime
         java.util.Date startTimeUtilDate = (java.util.Date) startTimeSpinner.getValue();
         java.util.Date endTimeUtilDate = (java.util.Date) endTimeSpinner.getValue();
-        
-        // Convert java.util.Date to java.sql.Timestamp for DATETIME compatibility
-        java.sql.Timestamp startTime = new java.sql.Timestamp(startTimeUtilDate.getTime());
-        java.sql.Timestamp endTime = new java.sql.Timestamp(endTimeUtilDate.getTime());
-        List<Student> selectedStudents = studentList.getSelectedValuesList();
-
+        LocalDateTime startDateTime = LocalDateTime.ofInstant(startTimeUtilDate.toInstant(), ZoneId.systemDefault());
+        LocalDateTime endDateTime = LocalDateTime.ofInstant(endTimeUtilDate.toInstant(), ZoneId.systemDefault());
+    
+        // Preparing SQL statements
         String insertModuleSql = "INSERT INTO Modules (name, staff_id) VALUES (?, ?)";
         String insertScheduledActivitySql = "INSERT INTO ScheduledActivities (type, title, start_time, end_time, location, module_id, staff_id, room_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         String insertStudentModuleRegistrationSql = "INSERT INTO StudentModuleRegistrations (student_id, module_id) VALUES (?, ?)";
@@ -165,7 +166,7 @@ public class CreateModuleScreen extends JFrame {
     
             // Register selected students to the module
             try (PreparedStatement pstmt = conn.prepareStatement(insertStudentModuleRegistrationSql)) {
-                for (Student student : selectedStudents) {
+                for (Student student : studentList.getSelectedValuesList()) {
                     pstmt.setInt(1, student.id);
                     pstmt.setLong(2, moduleId);
                     pstmt.executeUpdate();
@@ -175,8 +176,8 @@ public class CreateModuleScreen extends JFrame {
             // Insert scheduled activities and register students as participants
             for (int i = 0; i < 8; i++) {
                 LocalDate lessonDate = LocalDate.now().plusWeeks(i).with(TemporalAdjusters.nextOrSame(dayOfWeek));
-                Timestamp startTimestamp = Timestamp.valueOf(lessonDate.atTime(startTime));
-                Timestamp endTimestamp = Timestamp.valueOf(lessonDate.atTime(endTime));
+                Timestamp startTimestamp = Timestamp.valueOf(lessonDate.atTime(startDateTime.toLocalTime()));
+                Timestamp endTimestamp = Timestamp.valueOf(lessonDate.atTime(endDateTime.toLocalTime()));
     
                 long activityId;
                 try (PreparedStatement pstmt = conn.prepareStatement(insertScheduledActivitySql, Statement.RETURN_GENERATED_KEYS)) {
@@ -184,7 +185,7 @@ public class CreateModuleScreen extends JFrame {
                     pstmt.setString(2, moduleName + " Lesson");
                     pstmt.setTimestamp(3, startTimestamp);
                     pstmt.setTimestamp(4, endTimestamp);
-                    pstmt.setString(5, roomId == -1 ? "Online" : String.valueOf(roomId)); // Assuming -1 or similar for online
+                    pstmt.setString(5, "Specified Location"); // Adjust according to actual location handling
                     pstmt.setLong(6, moduleId);
                     pstmt.setInt(7, staffId);
                     pstmt.setInt(8, roomId);
@@ -201,7 +202,7 @@ public class CreateModuleScreen extends JFrame {
     
                 // Register each selected student as a participant for the activity
                 try (PreparedStatement pstmt = conn.prepareStatement(insertEventParticipantSql)) {
-                    for (Student student : selectedStudents) {
+                    for (Student student : studentList.getSelectedValuesList()) {
                         pstmt.setLong(1, activityId);
                         pstmt.setInt(2, student.id);
                         pstmt.executeUpdate();
@@ -215,9 +216,19 @@ public class CreateModuleScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
             try {
-                conn.rollback();
+                if (conn != null) {
+                    conn.rollback();
+                }
             } catch (SQLException exRollback) {
                 exRollback.printStackTrace();
+            }
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException exClose) {
+                    // Handle closing connection error
+                }
             }
         }
     }
