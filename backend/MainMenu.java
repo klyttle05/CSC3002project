@@ -28,7 +28,7 @@ public class MainMenu extends JFrame {
         add(welcomeLabel);
 
         JPanel panel = new JPanel(new GridLayout(0, 1, 5, 5));
-        if ("Admin".equals(userType)) {
+        if ("Staff".equals(userType)) {
             addButton(panel, "Timetable for Staff Member", e -> openStaffTimetable());
             addButton(panel, "Timetable for Room", e -> openRoomTimetable());
             addButton(panel, "Timetable for Module", e -> openModuleTimetable());
@@ -38,10 +38,12 @@ public class MainMenu extends JFrame {
             addButton(panel, "Create Staff User", e -> openCreateStaffScreen());
             addButton(panel, "Create Student User", e -> openCreateStudentScreen());
             addButton(panel, "Create Module Schedule", e -> openCreateModuleScreen());
+            addButton(panel, "Check All User Clashes", e -> openClashDetectionScreen());
         } else if ("Student".equals(userType)) {
             addButton(panel, "Your Teachers", e -> showTeachers());
             addButton(panel, "Your Modules", e -> showModules());
             addButton(panel, "Show Student Timetable", e -> showStudentTimetable());
+            addButton(panel, "Check for Clashes", e -> openClashDetectionScreen());
         }
 
         add(panel);
@@ -118,6 +120,19 @@ public class MainMenu extends JFrame {
         MyTimetableScreen myTimetableScreen = new MyTimetableScreen(userIDint);
         myTimetableScreen.setVisible(true);
     }
+
+    private void openClashDetectionScreen() {
+        boolean isStaff = false;
+        int userIDint = Integer.parseInt(userId);
+        if (userType == "Staff"){
+            isStaff = true;
+        } else if (userType == "Student"){
+            isStaff = false;
+        }
+        ClashDetectionScreen clashDetectionScreen = new ClashDetectionScreen(userIDint, isStaff);
+        clashDetectionScreen.setVisible(true);
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainMenu("Admin", "A1234567").setVisible(true));
     }

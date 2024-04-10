@@ -72,7 +72,7 @@ public class LoginScreen extends JFrame implements ActionListener {
     private String isValidCredentials(int userId, String password) {
         // Try to authenticate against Staff table first
         if (checkUserInTable(userId, password, "Staff")) {
-            return "Admin";
+            return "Staff";
         }
         // Then try Students table
         else if (checkUserInTable(userId, password, "Students")) {
