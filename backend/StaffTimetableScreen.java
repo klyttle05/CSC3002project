@@ -59,7 +59,6 @@ public class StaffTimetableScreen extends JFrame {
 
         Vector<Vector<Object>> data = new Vector<>();
 
-        // Adjusted SQL to reflect new database structure
         String sql = "SELECT sa.title, sa.start_time, sa.end_time, r.name AS location FROM ScheduledActivities sa " +
                      "LEFT JOIN Rooms r ON sa.room_id = r.room_id " +
                      "WHERE sa.staff_id = ?";
@@ -74,7 +73,7 @@ public class StaffTimetableScreen extends JFrame {
                     row.add(rs.getString("title"));
                     row.add(rs.getString("start_time"));
                     row.add(rs.getString("end_time"));
-                    row.add(rs.getString("location")); // Adjusted to 'r.name' to fetch room name
+                    row.add(rs.getString("location")); 
                     data.add(row);
                 }
             }

@@ -57,7 +57,7 @@ public class CreateStaffScreen extends JFrame {
         String firstName = firstNameField.getText();
         String lastName = lastNameField.getText();
         String email = emailField.getText();
-        String departmentId = departmentIdField.getText(); // Department handling might need adjustment based on your schema
+        String departmentId = departmentIdField.getText();
         String password = new String(passwordField.getPassword());
 
         // Hashing the password

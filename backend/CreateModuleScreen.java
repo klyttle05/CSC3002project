@@ -185,7 +185,7 @@ public class CreateModuleScreen extends JFrame {
                     pstmt.setString(2, moduleName + " Lesson");
                     pstmt.setTimestamp(3, startTimestamp);
                     pstmt.setTimestamp(4, endTimestamp);
-                    pstmt.setString(5, "Specified Location"); // Adjust according to actual location handling
+                    pstmt.setString(5, "Specified Location");
                     pstmt.setLong(6, moduleId);
                     pstmt.setInt(7, staffId);
                     pstmt.setInt(8, roomId);

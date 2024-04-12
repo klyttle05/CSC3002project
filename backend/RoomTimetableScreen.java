@@ -71,7 +71,7 @@ public class RoomTimetableScreen extends JFrame {
                     row.add(rs.getString("title"));
                     row.add(rs.getString("start_time"));
                     row.add(rs.getString("end_time"));
-                    row.add(rs.getString("type")); // Now directly using 'type' from ScheduledActivities
+                    row.add(rs.getString("type")); 
                     data.add(row);
                 }
             }

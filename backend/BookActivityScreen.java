@@ -35,7 +35,7 @@ public class BookActivityScreen extends JFrame {
 
     public BookActivityScreen() {
         initializeUI();
-        setSize(400, 700); // Adjusted for additional components
+        setSize(400, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
     }
@@ -75,7 +75,7 @@ public class BookActivityScreen extends JFrame {
         onlineRadioButton.addActionListener(e -> {
             if (onlineRadioButton.isSelected()) {
                 roomDropdown.setEnabled(false);
-                roomDropdown.setSelectedItem("Room 1"); // Assuming "Room 1" is your designated online activity room.
+                roomDropdown.setSelectedItem("Room 1");
             } else {
                 roomDropdown.setEnabled(true);
             }

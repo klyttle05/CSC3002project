@@ -95,7 +95,6 @@ public class MyTimetableScreen extends JFrame {
     
 
     private Connection getConnection() throws SQLException {
-        // Replace these with your actual database connection details
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
     }
 

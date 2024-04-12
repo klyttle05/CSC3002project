@@ -57,7 +57,6 @@ public class LoginScreen extends JFrame implements ActionListener {
 
             String userType = isValidCredentials(userId, password);
             if (!userType.equals("Invalid")) {
-                // Assuming MainMenu is appropriately set up to handle the user type and ID
                 MainMenu mainMenu = new MainMenu(userType, Integer.toString(userId));
                 mainMenu.setVisible(true);
                 this.dispose(); // Close the login screen

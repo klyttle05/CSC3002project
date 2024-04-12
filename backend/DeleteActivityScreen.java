@@ -76,7 +76,7 @@ public class DeleteActivityScreen extends JFrame {
         columnNames.add("Title");
         columnNames.add("Start Time");
         columnNames.add("End Time");
-        columnNames.add("Location/Online"); // Assuming you want to distinguish between online and location-based activities
+        columnNames.add("Location/Online");
     
         Vector<Vector<Object>> data = new Vector<>();
     
@@ -213,7 +213,6 @@ public class DeleteActivityScreen extends JFrame {
             
             if (affectedRows > 0) {
                 JOptionPane.showMessageDialog(this, "All related activities deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                // Optionally, refresh the activities table to reflect the deletion
                 searchActivities(null);
             } else {
                 JOptionPane.showMessageDialog(this, "No activities found to delete.", "No Activities Deleted", JOptionPane.INFORMATION_MESSAGE);

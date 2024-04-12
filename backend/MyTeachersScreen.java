@@ -38,7 +38,7 @@ public class MyTeachersScreen extends JFrame {
                      "JOIN StudentModuleRegistrations smr ON smr.module_id = m.module_id " +
                      "WHERE smr.student_id = ? " +
                      "UNION " +
-                     "SELECT DISTINCT s.last_name, '', s.email " + // Modules might not be directly related to some ScheduledActivities
+                     "SELECT DISTINCT s.last_name, '', s.email " + 
                      "FROM ScheduledActivities sa " +
                      "JOIN Staff s ON sa.staff_id = s.id " +
                      "WHERE EXISTS (SELECT 1 FROM StudentModuleRegistrations smr WHERE smr.student_id = ? AND smr.module_id = sa.module_id)";
@@ -47,13 +47,13 @@ public class MyTeachersScreen extends JFrame {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
              
             pstmt.setString(1, studentId);
-            pstmt.setString(2, studentId); // For the UNION part
+            pstmt.setString(2, studentId); 
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
                 Vector<Object> row = new Vector<>();
                 row.add(rs.getString("TeacherName"));
-                row.add(rs.getString("Module")); // This might be empty for activities not directly linked to modules
+                row.add(rs.getString("Module")); 
                 row.add(rs.getString("email"));
                 data.add(row);
             }

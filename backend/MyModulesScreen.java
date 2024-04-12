@@ -13,7 +13,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class MyModulesScreen extends JFrame {
-    private final int studentId; // Assuming studentId should be an integer.
+    private final int studentId; 
 
     public MyModulesScreen(int studentId) {
         this.studentId = studentId;
@@ -38,7 +38,7 @@ public class MyModulesScreen extends JFrame {
                  "FROM Modules m JOIN StudentModuleRegistrations smr ON m.module_id = smr.module_id " +
                  "WHERE smr.student_id = ?")) {
             
-            pstmt.setInt(1, studentId); // Corrected for integer studentId
+            pstmt.setInt(1, studentId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Vector<Object> row = new Vector<>();
@@ -60,7 +60,7 @@ public class MyModulesScreen extends JFrame {
 
     private Connection getConnection() {
         try {
-            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem"; // Corrected database name
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
             String user = "root";
             String password = "root";
             return DriverManager.getConnection(url, user, password);
