@@ -132,96 +132,100 @@ public class DeleteActivityScreen extends JFrame {
     }
 
     private void deleteActivity(int activityId) {
-        String sqlActivities = "DELETE FROM ScheduledActivities WHERE activity_id = ?";
         String sqlParticipants = "DELETE FROM EventParticipants WHERE activity_id = ?";
-        Connection conn = null; // Declare conn outside of the try block to make it accessible in finally
-    
+        String sqlActivities = "DELETE FROM ScheduledActivities WHERE activity_id = ?";
+        Connection conn = null;
+        
         try {
-            conn = getConnection();  // Assign the connection
-            PreparedStatement pstmtActivities = conn.prepareStatement(sqlActivities);
-            PreparedStatement pstmtParticipants = conn.prepareStatement(sqlParticipants);
-    
-            // Start transaction
+            conn = getConnection();
+             PreparedStatement pstmtParticipants = conn.prepareStatement(sqlParticipants);
+             PreparedStatement pstmtActivities = conn.prepareStatement(sqlActivities);
+
             conn.setAutoCommit(false);
-    
-            // Delete from EventParticipants
+
             pstmtParticipants.setInt(1, activityId);
             pstmtParticipants.executeUpdate();
-    
-            // Then delete the activity
+
             pstmtActivities.setInt(1, activityId);
             pstmtActivities.executeUpdate();
-    
-            // Commit transaction
+
             conn.commit();
-            JOptionPane.showMessageDialog(this, "Activity deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            searchActivities(null); // Refresh the table
-    
+            JOptionPane.showMessageDialog(this, "Activity  deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            searchActivities(null);  // Refresh the table after deletion
+
         } catch (SQLException ex) {
             try {
-                if (conn != null) conn.rollback(); // Rollback transaction in case of error
+                if (conn != null) conn.rollback();
             } catch (SQLException exRollback) {
                 JOptionPane.showMessageDialog(this, "Rollback failed: " + exRollback.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
             JOptionPane.showMessageDialog(this, "Error deleting the activity: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+
+    private void deleteAllActivities(ActionEvent e) {
+        String moduleId = deleteModuleField.getText().trim();
+        String roomId = deleteRoomField.getText().trim();
+    
+        if (moduleId.isEmpty() && roomId.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a Module ID or Room ID.", "No ID Provided", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+    
+        String sqlDeleteParticipants = "";
+        String sqlDeleteActivities = "";
+    
+        if (!moduleId.isEmpty()) {
+            sqlDeleteParticipants = "DELETE FROM EventParticipants WHERE activity_id IN (SELECT activity_id FROM ScheduledActivities WHERE module_id = ?)";
+            sqlDeleteActivities = "DELETE FROM ScheduledActivities WHERE module_id = ?";
+        } else {
+            sqlDeleteParticipants = "DELETE FROM EventParticipants WHERE activity_id IN (SELECT activity_id FROM ScheduledActivities WHERE room_id = ?)";
+            sqlDeleteActivities = "DELETE FROM ScheduledActivities WHERE room_id = ?";
+        }
+    
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false); // Start transaction
+    
+            // Delete from EventParticipants first
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteParticipants)) {
+                pstmt.setInt(1, Integer.parseInt(moduleId.isEmpty() ? roomId : moduleId));
+                pstmt.executeUpdate();
+            }
+    
+            // Then delete the activities
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteActivities)) {
+                pstmt.setInt(1, Integer.parseInt(moduleId.isEmpty() ? roomId : moduleId));
+                int affectedRows = pstmt.executeUpdate();
+                if (affectedRows == 0) {
+                    JOptionPane.showMessageDialog(this, "No activities found for deletion.", "Info", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+    
+            conn.commit(); // Commit transaction
+            JOptionPane.showMessageDialog(this, "Activity deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            searchActivities(null); // Refresh the table after deletion
+    
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid Module ID or Room ID.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            try {
+                if (conn != null) conn.rollback(); // Rollback on error
+            } catch (SQLException exRollback) {
+                JOptionPane.showMessageDialog(this, "Rollback failed: " + exRollback.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            JOptionPane.showMessageDialog(this, "Error deleting activities: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         } finally {
             try {
-                if (conn != null) conn.setAutoCommit(true);
+                if (conn != null) conn.setAutoCommit(true); // Reset auto-commit
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Error setting auto-commit: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
     
-
-    private void deleteAllActivities(ActionEvent e) {
-        // Retrieve the module ID and room ID from the input fields
-        String moduleId = deleteModuleField.getText().trim();
-        String room = deleteRoomField.getText().trim();
-    
-        // Initialize SQL statement and parameters for deletion
-        String sql = "";
-        int parameterValue = -1;
-    
-        if (!moduleId.isEmpty()) {
-            sql = "DELETE FROM ScheduledActivities WHERE module_id = ?";
-            try {
-                parameterValue = Integer.parseInt(moduleId);
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid Module ID.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        } else if (!room.isEmpty()) {
-            sql = "DELETE FROM ScheduledActivities WHERE room_id = ?";
-            try {
-                parameterValue = Integer.parseInt(room);
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid Room ID.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Please enter a Module ID or Room ID.", "No ID Provided", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-    
-        // Execute the delete operation
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, parameterValue);
-            int affectedRows = pstmt.executeUpdate();
-            
-            if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "All related activities deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                searchActivities(null);
-            } else {
-                JOptionPane.showMessageDialog(this, "No activities found to delete.", "No Activities Deleted", JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error deleting activities: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        }
-    }
     
     
 
