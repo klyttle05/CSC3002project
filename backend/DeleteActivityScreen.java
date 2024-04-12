@@ -134,42 +134,45 @@ public class DeleteActivityScreen extends JFrame {
     private void deleteActivity(int activityId) {
         String sqlActivities = "DELETE FROM ScheduledActivities WHERE activity_id = ?";
         String sqlParticipants = "DELETE FROM EventParticipants WHERE activity_id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement pstmtActivities = conn.prepareStatement(sqlActivities);
-             PreparedStatement pstmtParticipants = conn.prepareStatement(sqlParticipants)) {
-
+        Connection conn = null; // Declare conn outside of the try block to make it accessible in finally
+    
+        try {
+            conn = getConnection();  // Assign the connection
+            PreparedStatement pstmtActivities = conn.prepareStatement(sqlActivities);
+            PreparedStatement pstmtParticipants = conn.prepareStatement(sqlParticipants);
+    
             // Start transaction
             conn.setAutoCommit(false);
-
+    
             // Delete from EventParticipants
             pstmtParticipants.setInt(1, activityId);
             pstmtParticipants.executeUpdate();
-
+    
             // Then delete the activity
             pstmtActivities.setInt(1, activityId);
             pstmtActivities.executeUpdate();
-
+    
             // Commit transaction
             conn.commit();
             JOptionPane.showMessageDialog(this, "Activity deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             searchActivities(null); // Refresh the table
-
+    
         } catch (SQLException ex) {
             try {
-                conn.rollback(); // Rollback transaction in case of error
+                if (conn != null) conn.rollback(); // Rollback transaction in case of error
             } catch (SQLException exRollback) {
                 JOptionPane.showMessageDialog(this, "Rollback failed: " + exRollback.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
             JOptionPane.showMessageDialog(this, "Error deleting the activity: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } finally {
             try {
-                conn.setAutoCommit(true);
+                if (conn != null) conn.setAutoCommit(true);
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Error setting auto-commit: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
+    
 
     private void deleteAllActivities(ActionEvent e) {
         // Retrieve the module ID and room ID from the input fields
