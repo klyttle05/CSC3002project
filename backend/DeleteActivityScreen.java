@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -19,23 +20,24 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+
 public class DeleteActivityScreen extends JFrame {
     private JSpinner dateSpinner;
     private JTable activitiesTable;
     private JButton deleteButton, deleteAllButton;
     private JTextField deleteModuleField, deleteRoomField;
 
+    
     public DeleteActivityScreen() {
         setTitle("Delete Scheduled Activity");
         setSize(600, 400);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         initializeComponents();
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null); // Center on screen
     }
 
     private void initializeComponents() {
-        // Top panel with date spinner and search button
         JPanel topPanel = new JPanel();
         dateSpinner = new JSpinner(new SpinnerDateModel());
         JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd");
@@ -47,12 +49,10 @@ public class DeleteActivityScreen extends JFrame {
         topPanel.add(searchButton);
         add(topPanel, BorderLayout.NORTH);
 
-        // Activities table
         activitiesTable = new JTable();
         JScrollPane scrollPane = new JScrollPane(activitiesTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Bottom panel with delete options
         JPanel deletePanel = new JPanel();
         deleteButton = new JButton("Delete Selected Activity");
         deleteButton.addActionListener(this::deleteSelectedActivity);
@@ -127,31 +127,49 @@ public class DeleteActivityScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Please select an activity to delete.", "No Activity Selected", JOptionPane.WARNING_MESSAGE);
             return;
         }
-    
-        // Assuming the first column contains the activity ID
         int activityId = (Integer) activitiesTable.getModel().getValueAt(selectedRow, 0);
-    
-        String sql = "DELETE FROM ScheduledActivities WHERE activity_id = ?";
-    
+        deleteActivity(activityId);
+    }
+
+    private void deleteActivity(int activityId) {
+        String sqlActivities = "DELETE FROM ScheduledActivities WHERE activity_id = ?";
+        String sqlParticipants = "DELETE FROM EventParticipants WHERE activity_id = ?";
+        
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, activityId);
-            int affectedRows = pstmt.executeUpdate();
-            
-            if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "Activity deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                // Optionally, refresh the activities table to reflect the deletion
-                searchActivities(null);
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to delete the selected activity.", "Error", JOptionPane.ERROR_MESSAGE);
+             PreparedStatement pstmtActivities = conn.prepareStatement(sqlActivities);
+             PreparedStatement pstmtParticipants = conn.prepareStatement(sqlParticipants)) {
+
+            // Start transaction
+            conn.setAutoCommit(false);
+
+            // Delete from EventParticipants
+            pstmtParticipants.setInt(1, activityId);
+            pstmtParticipants.executeUpdate();
+
+            // Then delete the activity
+            pstmtActivities.setInt(1, activityId);
+            pstmtActivities.executeUpdate();
+
+            // Commit transaction
+            conn.commit();
+            JOptionPane.showMessageDialog(this, "Activity deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            searchActivities(null); // Refresh the table
+
+        } catch (SQLException ex) {
+            try {
+                conn.rollback(); // Rollback transaction in case of error
+            } catch (SQLException exRollback) {
+                JOptionPane.showMessageDialog(this, "Rollback failed: " + exRollback.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error deleting the activity: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error setting auto-commit: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
-    
 
     private void deleteAllActivities(ActionEvent e) {
         // Retrieve the module ID and room ID from the input fields
@@ -207,7 +225,7 @@ public class DeleteActivityScreen extends JFrame {
 
     private Connection getConnection() {
         try {
-            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem?useSSL=false";
+            String url = "jdbc:mysql://localhost:3306/universitymanagementsystem";
             String user = "root";
             String password = "root";
             return DriverManager.getConnection(url, user, password);
