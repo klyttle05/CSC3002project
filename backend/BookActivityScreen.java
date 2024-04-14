@@ -25,13 +25,13 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SwingUtilities;
 
 public class BookActivityScreen extends JFrame {
-    private JTextField activityNameField;
-    private JComboBox<String> activityTypeDropdown, staffDropdown, roomDropdown;
-    private JSpinner startTimeSpinner, endTimeSpinner;
-    private JButton submitButton, checkAvailabilityButton;
-    private DefaultListModel<Student> studentListModel;
-    private JList<Student> studentList;
-    private JRadioButton onlineRadioButton;
+    public JTextField activityNameField;
+    public JComboBox<String> activityTypeDropdown, staffDropdown, roomDropdown;
+    public JSpinner startTimeSpinner, endTimeSpinner;
+    public JButton submitButton, checkAvailabilityButton;
+    public DefaultListModel<Student> studentListModel;
+    public JList<Student> studentList;
+    public JRadioButton onlineRadioButton;
 
     public BookActivityScreen() {
         initializeUI();

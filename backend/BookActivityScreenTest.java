@@ -1,3 +1,5 @@
+import static org.junit.Assert.*;
+
 import java.sql.Timestamp;
 
 import javax.swing.JOptionPane;
