@@ -1,0 +1,126 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "BCryptPasswordHashing",
+            "request": "launch",
+            "mainClass": "BCryptPasswordHashing",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "BookActivityScreen",
+            "request": "launch",
+            "mainClass": "BookActivityScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "ClashDetectionScreen",
+            "request": "launch",
+            "mainClass": "ClashDetectionScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "CreateModuleScreen",
+            "request": "launch",
+            "mainClass": "CreateModuleScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "CreateStaffScreen",
+            "request": "launch",
+            "mainClass": "CreateStaffScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "CreateStudentScreen",
+            "request": "launch",
+            "mainClass": "CreateStudentScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "DeleteActivityScreen",
+            "request": "launch",
+            "mainClass": "DeleteActivityScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "LoginScreen",
+            "request": "launch",
+            "mainClass": "LoginScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "MainMenu",
+            "request": "launch",
+            "mainClass": "MainMenu",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "ModuleTimetableScreen",
+            "request": "launch",
+            "mainClass": "ModuleTimetableScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "MyModulesScreen",
+            "request": "launch",
+            "mainClass": "MyModulesScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "MyTeachersScreen",
+            "request": "launch",
+            "mainClass": "MyTeachersScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "MyTimetableScreen",
+            "request": "launch",
+            "mainClass": "MyTimetableScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "RoomTimetableScreen",
+            "request": "launch",
+            "mainClass": "RoomTimetableScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "StaffTimetableScreen",
+            "request": "launch",
+            "mainClass": "StaffTimetableScreen",
+            "projectName": "CSC3002project_74fd6192"
+        },
+        {
+            "type": "java",
+            "name": "StudentTimetableScreen",
+            "request": "launch",
+            "mainClass": "StudentTimetableScreen",
+            "projectName": "CSC3002project_74fd6192"
+        }
+    ]
+}
