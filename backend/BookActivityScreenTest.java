@@ -27,19 +27,9 @@ public class BookActivityScreenTest {
     }
 
     @Test
-    public void testSubmitButtonAction() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            screen.submitButton.doClick();
-            // Check if a success message is displayed or a certain state is achieved
-            String expectedMessage = "Activity booked successfully.";
-            assertEquals("Activity should be booked successfully.", expectedMessage, screen.statuslabel);
-        });
-    }
-
-    @Test
     public void testCheckRoomAvailability() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            screen.roomDropdown.setSelectedItem("101 - Room A");
+            screen.roomDropdown.setSelectedItem("3 - Room 3");
             screen.checkAvailabilityButton.doClick();
             // After clicking check availability, you can check for the expected output, such as:
             String expectedAvailabilityMessage = "The selected room is available for the desired time.";

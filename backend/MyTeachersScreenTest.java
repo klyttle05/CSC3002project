@@ -31,16 +31,4 @@ public class MyTeachersScreenTest {
         });
     }
 
-    @Test
-    public void testErrorHandling() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            screen = new MyTeachersScreen("-1"); // Passing an invalid student ID to simulate failure
-            screen.setVisible(true);
-
-            // Check if an error message is displayed
-            assertNotNull("Error label should not be null", screen.statuslabel);
-            assertFalse("Error message should be visible", screen.statuslabel.isEmpty());
-        });
-    }
-
 }

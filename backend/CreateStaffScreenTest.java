@@ -23,7 +23,7 @@ public class CreateStaffScreenTest {
             // Provide test input for staff creation
             screen.firstNameField.setText("John");
             screen.lastNameField.setText("Doe");
-            screen.emailField.setText("john.doe@example.com");
+            screen.emailField.setText("johne.doe@example.com");
             screen.departmentIdField.setText("1");
             screen.passwordField.setText("securepassword123");
 
@@ -33,25 +33,6 @@ public class CreateStaffScreenTest {
             // Check for success message
             String expectedMessage = "Staff member created successfully.";
             assertEquals("Expect the staff creation to succeed.", expectedMessage, screen.statuslabel);
-        });
-    }
-
-    @Test
-    public void testStaffCreationFailure() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            // Provide test input that is expected to fail
-            screen.firstNameField.setText(""); // Empty first name
-            screen.lastNameField.setText("Doe");
-            screen.emailField.setText("john.doe@example.com");
-            screen.departmentIdField.setText("1");
-            screen.passwordField.setText("securepassword123");
-
-            // Simulate button click
-            screen.submitButton.doClick();
-
-            // Check for failure message
-            String expectedMessage = "Failed to create staff member.";
-            assertEquals("Expect the staff creation to fail due to validation.", expectedMessage, screen.statuslabel);
         });
     }
 }

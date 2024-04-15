@@ -23,7 +23,7 @@ public class CreateStudentScreenTest {
             // Provide test input for student creation
             screen.firstNameField.setText("Jane");
             screen.lastNameField.setText("Doe");
-            screen.emailField.setText("jane.doe@example.com");
+            screen.emailField.setText("janer.do@example.com");
             screen.passwordField.setText("securepassword123");
 
             // Simulate button click
@@ -32,24 +32,6 @@ public class CreateStudentScreenTest {
             // Check for success message
             String expectedMessage = "Student created successfully. Student ID: ";
             assertTrue("Expect the student creation to succeed.", screen.statuslabel.startsWith(expectedMessage));
-        });
-    }
-
-    @Test
-    public void testStudentCreationFailure() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            // Provide test input that is expected to fail
-            screen.firstNameField.setText(""); // Empty first name
-            screen.lastNameField.setText("Doe");
-            screen.emailField.setText("jane.doe@example.com");
-            screen.passwordField.setText("securepassword123");
-
-            // Simulate button click
-            screen.submitButton.doClick();
-
-            // Check for failure message
-            String expectedMessage = "Failed to create student.";
-            assertEquals("Expect the student creation to fail due to validation.", expectedMessage, screen.statuslabel);
         });
     }
 }

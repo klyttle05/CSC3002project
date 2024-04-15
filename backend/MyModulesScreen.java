@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class MyModulesScreen extends JFrame {
     public final int studentId;
-    public JTable modulesTable;
+    public JTable modulesTable, modulesTableJT;
     public String statuslabel;
 
     public MyModulesScreen(int studentId) {
@@ -56,8 +56,8 @@ public class MyModulesScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Error fetching module information: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        JTable modulesTable = new JTable(new DefaultTableModel(data, columnNames));
-        JScrollPane scrollPane = new JScrollPane(modulesTable);
+        modulesTableJT = new JTable(new DefaultTableModel(data, columnNames));
+        JScrollPane scrollPane = new JScrollPane(modulesTableJT);
         add(scrollPane, BorderLayout.CENTER);
     }
 
