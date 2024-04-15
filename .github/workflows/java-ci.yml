@@ -1,0 +1,39 @@
+name: Java CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+    - name: Compile Java code
+      run: |
+        find . -name "*.java" > sources.txt
+        javac -d build @sources.txt
+    - name: Run tests
+      run: |
+        java -cp build org.junit.runner.JUnitCore BookActivityScreenTest
+        java -cp build org.junit.runner.JUnitCore CreateModuleScreenTest
+        java -cp build org.junit.runner.JUnitCore CreateStaffScreenTest
+        java -cp build org.junit.runner.JUnitCore CreateStudentScreenTest
+        java -cp build org.junit.runner.JUnitCore MyTimetableScreenTest
+        java -cp build org.junit.runner.JUnitCore DeleteActivityScreenTest
+        java -cp build org.junit.runner.JUnitCore RoomTimetableScreenTest
+        java -cp build org.junit.runner.JUnitCore StaffTimetableScreenTest
+        java -cp build org.junit.runner.JUnitCore StudentTimetableScreenTest
+        java -cp build org.junit.runner.JUnitCore ModuleTimetableScreenTest
+        java -cp build org.junit.runner.JUnitCore MyModulesScreenTest
+        java -cp build org.junit.runner.JUnitCore MyTeachersScreenTest
+        java -cp build org.junit.runner.JUnitCore ClashDetectionScreenTest
