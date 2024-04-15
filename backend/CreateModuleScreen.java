@@ -27,12 +27,13 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SwingUtilities;
 
 public class CreateModuleScreen extends JFrame {
-    private JTextField moduleNameField;
-    private JComboBox<String> staffDropdown, roomDropdown, dayOfWeekDropdown;
-    private JList<Student> studentList;
-    private DefaultListModel<Student> studentListModel;
-    private JButton submitButton;
-    private JSpinner startTimeSpinner, endTimeSpinner;
+    public JTextField moduleNameField;
+    public JComboBox<String> staffDropdown, roomDropdown, dayOfWeekDropdown;
+    public JList<Student> studentList;
+    public DefaultListModel<Student> studentListModel;
+    public JButton submitButton;
+    public JSpinner startTimeSpinner, endTimeSpinner;
+    public String statuslabel;
 
     public CreateModuleScreen() {
         initializeUI();
@@ -84,7 +85,7 @@ public class CreateModuleScreen extends JFrame {
         submitButton.addActionListener(this::createModuleAndScheduleLessons);
     }
 
-    private void loadStaffMembers() {
+    public void loadStaffMembers() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM Staff")) {
@@ -98,7 +99,7 @@ public class CreateModuleScreen extends JFrame {
         }
     }
 
-    private void loadRooms() {
+    public void loadRooms() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT room_id, name FROM Rooms")) {
@@ -112,7 +113,7 @@ public class CreateModuleScreen extends JFrame {
         }
     }
 
-    private void loadStudents() {
+    public void loadStudents() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM Students")) {
@@ -211,6 +212,7 @@ public class CreateModuleScreen extends JFrame {
             }
     
             conn.commit();
+            statuslabel = "Module created and scheduled lessons added successfully.";
             JOptionPane.showMessageDialog(this, "Module created and scheduled lessons added successfully.");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
@@ -241,7 +243,7 @@ public class CreateModuleScreen extends JFrame {
         SwingUtilities.invokeLater(() -> new CreateModuleScreen().setVisible(true));
     }
 
-    class Student {
+    public class Student {
         int id;
         String name;
 

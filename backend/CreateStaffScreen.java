@@ -16,9 +16,10 @@ import javax.swing.SwingUtilities;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class CreateStaffScreen extends JFrame {
-    private JTextField firstNameField, lastNameField, emailField, departmentIdField;
-    private JPasswordField passwordField;
-    private JButton submitButton;
+    public JTextField firstNameField, lastNameField, emailField, departmentIdField;
+    public JPasswordField passwordField;
+    public JButton submitButton;
+    public String statuslabel;
 
     public CreateStaffScreen() {
         setTitle("Create New Staff Member");
@@ -83,12 +84,14 @@ public class CreateStaffScreen extends JFrame {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         long newStaffId = generatedKeys.getLong(1);
+                        statuslabel = "Staff member created successfully.";
                         JOptionPane.showMessageDialog(this, "Staff member created successfully. Staff ID: " + newStaffId);
                     } else {
                         JOptionPane.showMessageDialog(this, "Failed to retrieve staff ID.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             } else {
+                statuslabel = "Failed to create staff member.";
                 JOptionPane.showMessageDialog(this, "Failed to create staff member.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception ex) {

@@ -14,6 +14,8 @@ import javax.swing.table.DefaultTableModel;
 
 public class MyTeachersScreen extends JFrame {
     private final String studentId;
+    public JTable teachersTable;
+    public String statuslabel;
 
     public MyTeachersScreen(String studentId) {
         this.studentId = studentId;
@@ -59,6 +61,7 @@ public class MyTeachersScreen extends JFrame {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            statuslabel = "Error fetching teacher information: ";
             JOptionPane.showMessageDialog(this, "Error fetching teacher information: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -68,7 +71,7 @@ public class MyTeachersScreen extends JFrame {
                 return false;
             }
         };
-        JTable teachersTable = new JTable(model);
+        teachersTable = new JTable(model);
         add(new JScrollPane(teachersTable), BorderLayout.CENTER);
     }
 

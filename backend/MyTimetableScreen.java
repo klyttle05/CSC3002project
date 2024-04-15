@@ -20,11 +20,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class MyTimetableScreen extends JFrame {
-    private JTable timetable;
-    private JButton previousWeekButton, nextWeekButton;
-    private JLabel weekLabel;
-    private LocalDate currentWeekStart;
-    private int studentId;
+    public JTable timetable;
+    public JButton previousWeekButton, nextWeekButton;
+    public JLabel weekLabel;
+    public LocalDate currentWeekStart;
+    public int studentId;
 
     public MyTimetableScreen(int studentId) {
         this.studentId = studentId;

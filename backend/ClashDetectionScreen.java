@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 public class ClashDetectionScreen extends JFrame {
     private int userId;
     private boolean isStaff;
-    private JTable studentClashesTable, staffClashesTable;
+    public JTable studentClashesTable, staffClashesTable;
 
     public ClashDetectionScreen(int userId, boolean isStaff) {
         this.userId = userId;
@@ -43,7 +43,7 @@ public class ClashDetectionScreen extends JFrame {
         staffClashesTable.setVisible(isStaff); 
     }
 
-    private void loadStudentClashes() {
+    public void loadStudentClashes() {
         String studentClashesQuery;
         if (isStaff) {
             // Staff member query retrieves all student clashes
@@ -97,7 +97,7 @@ public class ClashDetectionScreen extends JFrame {
         }
     }
 
-    private void loadStaffClashes() {
+    public void loadStaffClashes() {
         // Similar to loadStudentClashes but for staff
         // This requires a different SQL query that checks for staff member's activity overlaps
         String query = getStaffClashesQuery(); // This query now needs to target staff-specific clashes

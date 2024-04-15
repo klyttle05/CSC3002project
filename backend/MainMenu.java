@@ -8,8 +8,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class MainMenu extends JFrame {
-    private String userType;
-    private String userId;
+    public String userType;
+    public String userId;
 
     public MainMenu(String userType, String userId) {
         this.userType = userType;

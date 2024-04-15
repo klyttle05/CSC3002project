@@ -16,9 +16,10 @@ import javax.swing.SwingUtilities;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class CreateStudentScreen extends JFrame {
-    private JTextField firstNameField, lastNameField, emailField;
-    private JPasswordField passwordField;
-    private JButton submitButton;
+    public JTextField firstNameField, lastNameField, emailField;
+    public JPasswordField passwordField;
+    public JButton submitButton;
+    public String statuslabel;
 
     public CreateStudentScreen() {
         setTitle("Create New Student");
@@ -77,12 +78,14 @@ public class CreateStudentScreen extends JFrame {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         long newStudentId = generatedKeys.getLong(1);
+                        statuslabel = "Student created successfully. Student ID: ";
                         JOptionPane.showMessageDialog(this, "Student created successfully. Student ID: " + newStudentId);
                     } else {
                         JOptionPane.showMessageDialog(this, "Failed to retrieve student ID.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             } else {
+                statuslabel= "Failed to create student.";
                 JOptionPane.showMessageDialog(this, "Failed to create student.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception ex) {

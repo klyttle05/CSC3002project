@@ -13,7 +13,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class MyModulesScreen extends JFrame {
-    private final int studentId; 
+    public final int studentId;
+    public JTable modulesTable;
+    public String statuslabel;
 
     public MyModulesScreen(int studentId) {
         this.studentId = studentId;
@@ -50,6 +52,7 @@ public class MyModulesScreen extends JFrame {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+            statuslabel = "Error fetching module information: ";
             JOptionPane.showMessageDialog(this, "Error fetching module information: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 

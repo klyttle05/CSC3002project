@@ -32,6 +32,7 @@ public class BookActivityScreen extends JFrame {
     public DefaultListModel<Student> studentListModel;
     public JList<Student> studentList;
     public JRadioButton onlineRadioButton;
+    public String statuslabel;
 
     public BookActivityScreen() {
         initializeUI();
@@ -205,7 +206,7 @@ public class BookActivityScreen extends JFrame {
                 long activityId = rs.getLong(1);
                 insertEventParticipants(activityId); // Call to insert event participants
             }
-    
+            statuslabel = "Activity booked successfully.";
             JOptionPane.showMessageDialog(this, "Activity booked successfully.", "Booking Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -278,6 +279,7 @@ public class BookActivityScreen extends JFrame {
                 int overlappingBookings = rs.getInt(1);
                 if (overlappingBookings == 0) {
                     // If there are no overlapping bookings, the room is available
+                    statuslabel = "The selected room is available for the desired time.";
                     JOptionPane.showMessageDialog(this, "The selected room is available for the desired time.", "Room Available", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     // If there are overlapping bookings, the room is not available

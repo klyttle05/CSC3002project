@@ -23,9 +23,10 @@ import javax.swing.table.DefaultTableModel;
 
 public class DeleteActivityScreen extends JFrame {
     private JSpinner dateSpinner;
-    private JTable activitiesTable;
-    private JButton deleteButton, deleteAllButton;
-    private JTextField deleteModuleField, deleteRoomField;
+    public JTable activitiesTable;
+    public JButton deleteButton, deleteAllButton;
+    public JTextField deleteModuleField, deleteRoomField;
+    public String statuslabel;
 
     
     public DeleteActivityScreen() {
@@ -150,6 +151,7 @@ public class DeleteActivityScreen extends JFrame {
             pstmtActivities.executeUpdate();
 
             conn.commit();
+            statuslabel = "Activity  deleted successfully.";
             JOptionPane.showMessageDialog(this, "Activity  deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             searchActivities(null);  // Refresh the table after deletion
 
@@ -205,6 +207,7 @@ public class DeleteActivityScreen extends JFrame {
             }
     
             conn.commit(); // Commit transaction
+            statuslabel = "Activity deleted successfully.";
             JOptionPane.showMessageDialog(this, "Activity deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             searchActivities(null); // Refresh the table after deletion
     

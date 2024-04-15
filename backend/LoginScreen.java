@@ -20,10 +20,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class LoginScreen extends JFrame implements ActionListener {
     
-    private JTextField userIdField;
-    private JPasswordField passwordField;
-    private JButton loginButton;
-    
+    public JTextField userIdField;
+    public JPasswordField passwordField;
+    public JButton loginButton;
+    public String statuslabel;
+
     public LoginScreen() {
         setTitle("Login");
         setSize(300, 150);
@@ -61,9 +62,11 @@ public class LoginScreen extends JFrame implements ActionListener {
                 mainMenu.setVisible(true);
                 this.dispose(); // Close the login screen
             } else {
+                statuslabel = "Login failed! Please try again.";
                 JOptionPane.showMessageDialog(this, "Login failed! Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException ex) {
+            statuslabel = "Please enter a valid numeric ID.";
             JOptionPane.showMessageDialog(this, "Please enter a valid numeric ID.", "Input Error", JOptionPane.ERROR_MESSAGE);
         }
     }

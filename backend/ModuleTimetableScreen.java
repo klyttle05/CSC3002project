@@ -18,9 +18,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class ModuleTimetableScreen extends JFrame {
-    private JTextField moduleIdField;
-    private JButton searchButton;
-    private JTable timetableTable;
+    public JTextField moduleIdField;
+    public JButton searchButton;
+    public JTable timetableTable;
 
     public ModuleTimetableScreen() {
         setTitle("Module Timetable");
