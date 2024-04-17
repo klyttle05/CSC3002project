@@ -7,7 +7,15 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,9 +28,10 @@ import javax.swing.SwingUtilities;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class LoginScreen extends JFrame implements ActionListener {
-    private JTextField userIdField, emailField;
-    private JPasswordField passwordField;
-    private JButton loginButton, forgotPasswordButton;
+    public JTextField userIdField;
+    public JPasswordField passwordField;
+    public JButton loginButton, forgotPasswordButton;
+    public String statuslabel;
     private String recoveryCode; // Temporary recovery code
 
     public LoginScreen() {
@@ -70,9 +79,11 @@ public class LoginScreen extends JFrame implements ActionListener {
                 new MainMenu(userType, userIdText).setVisible(true);
                 this.dispose();
             } else {
+                statuslabel = "Login failed! Please try again.";
                 JOptionPane.showMessageDialog(this, "Login failed! Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException ex) {
+            statuslabel = "Please enter a valid numeric ID.";
             JOptionPane.showMessageDialog(this, "Please enter a valid numeric ID.", "Input Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -128,8 +139,35 @@ public class LoginScreen extends JFrame implements ActionListener {
     }
 
     private void sendEmail(String to, String subject, String text) {
-        // Note: Implement this method to actually send an email.
+        String from = "unisystem381@gmail.com";
+    
+        Properties properties = System.getProperties();
+        properties.setProperty("mail.smtp.host", "smtp.gmail.com");
+        properties.setProperty("mail.smtp.port", "587");
+        properties.setProperty("mail.smtp.auth", "true");
+        properties.setProperty("mail.smtp.starttls.enable", "true"); // Enable TLS
+    
+        // Set your email and password for the SMTP server
+        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication("unisystem381@gmail.com", "vyge euyn gmwb hjdu");
+            }
+        });
+    
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(from));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+            message.setSubject(subject);
+            message.setText(text);
+    
+            Transport.send(message);
+            System.out.println("Email sent successfully!");
+        } catch (MessagingException mex) {
+            mex.printStackTrace();
+        }
     }
+    
 
     private void updatePassword(String email, String newPassword) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
