@@ -39,11 +39,13 @@ public class MainMenu extends JFrame {
             addButton(panel, "Create Student User", e -> openCreateStudentScreen());
             addButton(panel, "Create Module Schedule", e -> openCreateModuleScreen());
             addButton(panel, "Check All User Clashes", e -> openClashDetectionScreen());
+            addButton(panel, "Log Out", e -> logOut());
         } else if ("Student".equals(userType)) {
             addButton(panel, "Your Teachers", e -> showTeachers());
             addButton(panel, "Your Modules", e -> showModules());
             addButton(panel, "Show Student Timetable", e -> showStudentTimetable());
             addButton(panel, "Check for Clashes", e -> openClashDetectionScreen());
+            addButton(panel, "Log Out", e -> logOut());
         }
 
         add(panel);
@@ -53,6 +55,12 @@ public class MainMenu extends JFrame {
         JButton button = new JButton(text);
         button.addActionListener(actionListener);
         panel.add(button);
+    }
+
+    private void logOut(){
+        this.dispose();
+        LoginScreen loginScreen = new LoginScreen();
+        loginScreen.setVisible(true);
     }
 
     // Implemented action methods for admin and student functionalities

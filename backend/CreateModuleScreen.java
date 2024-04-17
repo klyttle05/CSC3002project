@@ -30,18 +30,18 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SwingUtilities;
 
 public class CreateModuleScreen extends JFrame {
-    private JTextField moduleNameField;
-    private JComboBox<String> staffDropdown, roomDropdown, dayOfWeekDropdown, secondDayOfWeekDropdown;
-    private JList<Student> studentList;
-    private DefaultListModel<Student> studentListModel;
-    private JButton submitButton;
-    private JSpinner startTimeSpinner, endTimeSpinner, secondStartTimeSpinner, secondEndTimeSpinner;
-    private JCheckBox secondDayCheckBox;
-    private JLabel statusLabel;
+    public JTextField moduleNameField;
+    public JComboBox<String> staffDropdown, roomDropdown, dayOfWeekDropdown, secondDayOfWeekDropdown;
+    public JList<Student> studentList;
+    public DefaultListModel<Student> studentListModel;
+    public JButton submitButton;
+    public JSpinner startTimeSpinner, endTimeSpinner, secondStartTimeSpinner, secondEndTimeSpinner;
+    public JCheckBox secondDayCheckBox;
+    public String statusLabel;
 
     public CreateModuleScreen() {
         initializeUI();
-        setSize(700, 500);
+        setSize(900, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         loadStaffMembers();
@@ -89,27 +89,21 @@ public class CreateModuleScreen extends JFrame {
 
         secondDayOfWeekDropdown = new JComboBox<>(new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"});
         secondDayOfWeekDropdown.setVisible(false);
-        add(new JLabel("Second Day of Week:"));
         add(secondDayOfWeekDropdown);
 
         secondStartTimeSpinner = new JSpinner(new SpinnerDateModel());
         secondStartTimeSpinner.setEditor(new JSpinner.DateEditor(secondStartTimeSpinner, "HH:mm"));
         secondStartTimeSpinner.setVisible(false);
-        add(new JLabel("Second Start Time:"));
         add(secondStartTimeSpinner);
 
         secondEndTimeSpinner = new JSpinner(new SpinnerDateModel());
         secondEndTimeSpinner.setEditor(new JSpinner.DateEditor(secondEndTimeSpinner, "HH:mm"));
         secondEndTimeSpinner.setVisible(false);
-        add(new JLabel("Second End Time:"));
         add(secondEndTimeSpinner);
 
         submitButton = new JButton("Create Module");
         submitButton.addActionListener(this::createModuleAndScheduleLessons);
         add(submitButton);
-
-        statusLabel = new JLabel("");
-        add(statusLabel);
 
         secondDayCheckBox.addActionListener(e -> toggleSecondDay(secondDayCheckBox.isSelected()));
     }
@@ -201,6 +195,7 @@ public class CreateModuleScreen extends JFrame {
             registerStudentsToActivities(conn, activityIds);
             
             conn.commit();
+            statusLabel = "Module created and scheduled lessons added successfully.";
             JOptionPane.showMessageDialog(this, "Module created and scheduled lessons added successfully for both days.");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
@@ -226,6 +221,7 @@ public class CreateModuleScreen extends JFrame {
     private List<Long> scheduleActivities(Connection conn, long moduleId, int staffId, int roomId, DayOfWeek dayOfWeek, LocalDateTime startDateTime, LocalDateTime endDateTime) throws SQLException {
         String insertScheduledActivitySql = "INSERT INTO ScheduledActivities (type, title, start_time, end_time, location, module_id, staff_id, room_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         List<Long> activityIds = new ArrayList<>();
+        String moduleName = moduleNameField.getText().trim();
         for (int i = 0; i < 8; i++) {
             LocalDate lessonDate = LocalDate.now().plusWeeks(i).with(TemporalAdjusters.nextOrSame(dayOfWeek));
             Timestamp startTimestamp = Timestamp.valueOf(lessonDate.atTime(startDateTime.toLocalTime()));
@@ -274,6 +270,31 @@ public class CreateModuleScreen extends JFrame {
                 }
             }
         }
+    }
+    
+    private long insertModule(Connection conn, String moduleName, int staffId) throws SQLException {
+        String insertModuleSql = "INSERT INTO Modules (name, staff_id) VALUES (?, ?)";
+        long moduleId = -1; // Default to an invalid value
+    
+        try (PreparedStatement pstmt = conn.prepareStatement(insertModuleSql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, moduleName);
+            pstmt.setInt(2, staffId);
+            int affectedRows = pstmt.executeUpdate();
+    
+            if (affectedRows == 0) {
+                throw new SQLException("Creating module failed, no rows affected.");
+            }
+    
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    moduleId = generatedKeys.getLong(1);
+                } else {
+                    throw new SQLException("Creating module failed, no ID obtained.");
+                }
+            }
+        }
+    
+        return moduleId; // Return the generated module ID
     }
     
 

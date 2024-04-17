@@ -32,7 +32,7 @@ public class CreateModuleScreenTest {
             screen.submitButton.doClick();
 
             String expectedMessage = "Module created and scheduled lessons added successfully.";
-            assertEquals("Expect the module creation to succeed.", expectedMessage, screen.statuslabel);
+            assertEquals("Expect the module creation to succeed.", expectedMessage, screen.statusLabel);
         });
     }
 
