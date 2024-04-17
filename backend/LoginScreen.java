@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -17,6 +19,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.mysql.cj.protocol.Message;
 
 public class LoginScreen extends JFrame implements ActionListener {
     
@@ -102,6 +106,96 @@ public class LoginScreen extends JFrame implements ActionListener {
         }
         return false;
     }
+
+    private boolean sendRecoveryCode(String email) {
+        String recoveryCode = generateRecoveryCode();
+        if (sendCodeAndUpdateUser(email, recoveryCode, "Staff") || sendCodeAndUpdateUser(email, recoveryCode, "Students")) {
+            String subject = "Your Password Recovery Code";
+            String messageText = "Here is your password recovery code: " + recoveryCode;
+            try {
+                sendEmail(email, subject, messageText);
+                return true;
+            } catch (MessagingException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return false;
+    }
+    
+    private void sendEmail(String to, String subject, String text) throws MessagingException {
+        String from = "your-email@example.com";
+        Properties properties = System.getProperties();
+        properties.setProperty("mail.smtp.host", "smtp.example.com");
+        Session session = Session.getDefaultInstance(properties);
+    
+        MimeMessage message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(from));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+        message.setSubject(subject);
+        message.setText(text);
+    
+        Transport.send(message);
+    }
+
+    private boolean sendCodeAndUpdateUser(String email, String recoveryCode, String tableName) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+             PreparedStatement pstmt = conn.prepareStatement("SELECT email FROM " + tableName + " WHERE email = ?");
+             PreparedStatement updateStmt = conn.prepareStatement("UPDATE " + tableName + " SET recovery_code = ? WHERE email = ?")) {
+            
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                updateStmt.setString(1, recoveryCode);
+                updateStmt.setString(2, email);
+                updateStmt.executeUpdate();
+                return true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+    
+    private boolean validateRecoveryCode(String email, String code) {
+        return checkCodeInTable(email, code, "Staff") || checkCodeInTable(email, code, "Students");
+    }
+    
+    private boolean checkCodeInTable(String email, String code, String tableName) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+             PreparedStatement pstmt = conn.prepareStatement("SELECT recovery_code FROM " + tableName + " WHERE email = ?")) {
+            
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next() && rs.getString("recovery_code").equals(code)) {
+                return true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+    
+    private void updatePassword(String email, String newPassword) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(newPassword);
+    
+        updatePasswordInTable(email, hashedPassword, "Staff");
+        updatePasswordInTable(email, hashedPassword, "Students");
+    }
+    
+    private void updatePasswordInTable(String email, String hashedPassword, String tableName) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+             PreparedStatement pstmt = conn.prepareStatement("UPDATE " + tableName + " SET password_hash = ? WHERE email = ?")) {
+            
+            pstmt.setString(1, hashedPassword);
+            pstmt.setString(2, email);
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to update password in " + tableName, "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LoginScreen().setVisible(true));
